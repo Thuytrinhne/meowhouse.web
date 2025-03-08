@@ -15,6 +15,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { API_BASE_URL } from "@/utils/constants/urls";
+export const dynamic = "force-dynamic";
 
 export default function SearchResultPage() {
   const searchParams = useSearchParams();
