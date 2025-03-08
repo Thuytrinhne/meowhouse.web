@@ -6,16 +6,11 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "sonner";
 
-// import components
-import { BreadCrumb, ScrollUp } from "@/components";
-
-// import partials
-import { CustomerFooter, CustomerHeader } from "@/partials";
-
 // import css
 import "./globals.css";
 import { Providers } from "./providers";
 import { PageLoader } from "@/components/(general)/layouts/page-loader";
+import MessengerButton from "@/components/(home)/messenger";
 
 const josefin = Josefin_Sans({
   subsets: ["latin"],
@@ -42,6 +37,7 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange>
               {children}
+              <MessengerButton />
               <Toaster position="top-right" richColors />
               <SpeedInsights />
               <Analytics />
