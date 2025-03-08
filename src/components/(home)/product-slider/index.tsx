@@ -58,8 +58,8 @@ export default function ProductSlider() {
       variant_name: hasMultipleVariants
         ? product.variant_names.map((v: any) => v || "")
         : [],
-      product_price: product.lowest_price,
-      lowest_price: product.lowest_price * product.highest_discount,
+      product_price: product.product_price,
+      lowest_price: product.lowest_price,
       highest_discount: product.highest_discount,
     };
   };

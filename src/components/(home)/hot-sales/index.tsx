@@ -41,8 +41,9 @@ export default function HotSales() {
       variant_name: hasMultipleVariants
         ? product.variant_names.map((v: any) => v || "")
         : [],
-      product_price: product.lowest_price,
-      lowest_price: product.lowest_price * product.highest_discount,
+      product_price:
+        product.lowest_price / (1 - product.highest_discount / 100),
+      lowest_price: product.lowest_price,
       highest_discount: product.highest_discount,
     };
   };
