@@ -78,7 +78,6 @@ export default function CartPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // console.log("sessssssssss", session);
       const localCartData = JSON.parse(localStorage.getItem("cart")) || [];
       localStorage.removeItem("cart");
 
