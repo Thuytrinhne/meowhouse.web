@@ -28,14 +28,19 @@ import { convertNumberToVND } from "@/utils/functions/convert";
 
 // import types
 import { ICartProduct } from "@/types/interfaces";
+import { useRouter } from "next/navigation";
 
 // import data
 import { PAGE_DATA } from "@/data/customer";
 import { DIALOG_DATA } from "@/data/dialog";
 import Image from "next/image";
 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 export default function CartPage() {
   const { data: session } = useSession(); // Lấy thông tin session
+  const router = useRouter();
 
   const [defaultCartProducts, setDefaultCartProducts] = useState<
     ICartProduct[]
@@ -57,34 +62,17 @@ export default function CartPage() {
   const [sortTotalPriceState, setSortTotalPriceState] =
     useState<string>("none");
 
-  const handleCartChangePage = async () => {
-    try {
-      if (!session || !cartProducts) {
-        console.log("Session or cart not found");
-        return;
-      }
-
-      const data = await putData(PUBLIC_CUSTOMER_CART_URL, {
-        userId: session.user.id,
-        cartProducts,
-      });
-
-      return data.user_cart[0];
-    } catch (err) {
-      console.log("error: ", err);
-      return;
-    }
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       const localCartData = JSON.parse(localStorage.getItem("cart")) || [];
-      localStorage.removeItem("cart");
+      console.log("local", localCartData);
+      //localStorage.removeItem("cart");
 
       const cartData = await postData(
         `${PUBLIC_CUSTOMER_CART_URL}/${session ? session.user.id : "undefined"}`,
         localCartData
       );
+
       const userCart = cartData.user_cart;
 
       if (!userCart || userCart.length == 0) {
@@ -100,56 +88,59 @@ export default function CartPage() {
       setCartProducts(data.products);
       setDefaultCartProducts(data.products);
       setIsFetched(true);
+      if (session) {
+        localStorage.removeItem("cart");
+      }
     };
 
     fetchData();
   }, [session]);
 
-  useEffect(() => {
-    if (session) {
-      let isProcessing = false;
+  // useEffect(() => {
+  //   if (session) {
+  //     let isProcessing = false;
 
-      const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
-        if (isProcessing) return; // Ngừng xử lý nếu đã đang thực hiện
+  //     const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
+  //       if (isProcessing) return; // Ngừng xử lý nếu đã đang thực hiện
 
-        event.preventDefault(); // Ngăn việc chuyển trang/refresh
-        event.returnValue = ""; // Hiển thị cảnh báo xác nhận (tuỳ vào trình duyệt)
+  //       event.preventDefault(); // Ngăn việc chuyển trang/refresh
+  //       event.returnValue = ""; // Hiển thị cảnh báo xác nhận (tuỳ vào trình duyệt)
 
-        isProcessing = true;
+  //       isProcessing = true;
 
-        try {
-          await handleCartChangePage(); // Xử lý thay đổi giỏ hàng
-        } catch (error) {
-          console.error("Error during handleCartChangePage:", error);
-        }
+  //       try {
+  //         await handleCartChangePage(); // Xử lý thay đổi giỏ hàng
+  //       } catch (error) {
+  //         console.error("Error during handleCartChangePage:", error);
+  //       }
 
-        // Sau khi xử lý xong, cho phép chuyển trang
-        isProcessing = false;
-      };
+  //       // Sau khi xử lý xong, cho phép chuyển trang
+  //       isProcessing = false;
+  //     };
 
-      window.addEventListener("beforeunload", handleBeforeUnload);
+  //     window.addEventListener("beforeunload", handleBeforeUnload);
 
-      return () => {
-        window.removeEventListener("beforeunload", handleBeforeUnload);
-      };
-    }
-  }, [session, cartProducts]);
+  //     return () => {
+  //       window.removeEventListener("beforeunload", handleBeforeUnload);
+  //     };
+  //   }
+  // }, [session, cartProducts]);
 
-  useEffect(() => {
-    if (isFetched) {
-      const updatedLocalStorageCartProducts = cartProducts.map((item) => ({
-        product_hashed_id: item.product_hashed_id,
-        quantity: item.quantity,
-        variant_id: item.variant_id,
-      }));
+  // useEffect(() => {
+  //   if (isFetched) {
+  //     const updatedLocalStorageCartProducts = cartProducts.map((item) => ({
+  //       product_hashed_id: item.product_hashed_id,
+  //       quantity: item.quantity,
+  //       variant_id: item.variant_id,
+  //     }));
 
-      localStorage.removeItem("cart");
-      localStorage.setItem(
-        "cart",
-        JSON.stringify(updatedLocalStorageCartProducts)
-      );
-    }
-  }, [cartProducts]);
+  //     localStorage.removeItem("cart");
+  //     localStorage.setItem(
+  //       "cart",
+  //       JSON.stringify(updatedLocalStorageCartProducts)
+  //     );
+  //   }
+  // }, [cartProducts]);
 
   useEffect(() => {
     setOriginalTotalPrice(
@@ -198,9 +189,20 @@ export default function CartPage() {
     setSelectedCartProducts(value ? [...cartProducts] : []);
   };
 
-  const handleDeleteCartProducts = () => {
+  const handleDeleteCartProducts = async () => {
     setDeletedCartProducts((prev) => [...prev, ...selectedCartProducts]);
-
+    const deletionCartProducts = selectedCartProducts.map((item) => ({
+      ...item,
+      quantity: -item.quantity, // chuyển số lượng thành số âm
+    }));
+    console.log("delete", deletionCartProducts);
+    const data = await putData(`${PUBLIC_CUSTOMER_CART_URL}`, {
+      userId: session.user.id,
+      cartProducts: deletionCartProducts,
+    });
+    if (data) {
+      toast.success("Xóa thành công");
+    }
     if (isSelectedAll) setCartProducts([]);
     else
       setCartProducts((prev: ICartProduct[]) => {
@@ -436,9 +438,16 @@ export default function CartPage() {
                   />
                 </div>
               </div>
-              <p className="font-semibold">
+              <p className="font-semibold mt-5">
                 Hiện không có sản phẩm trong Giỏ Hàng
               </p>
+
+              <Button
+                className="bg-pri-7 dark:bg-pri-8 dark:hover:bg-pri-9 dark:text-white h-auto w-full sm:w-2/3 md:w-1/2 mx-auto block text-base sm:text-base md:text-base mt-5"
+                variant="custom"
+                onClick={() => router.push("/")}>
+                Quay về trang chủ
+              </Button>
             </div>
           )}
         </section>
@@ -490,6 +499,7 @@ export default function CartPage() {
           <span className="ml-1">{PAGE_DATA["cart-term-5"]}</span>
         </p>
       </section>
+      <ToastContainer className="!z-[99999] !mt-[50px] !w-fit max-w-[420px]" />
     </div>
   );
 }

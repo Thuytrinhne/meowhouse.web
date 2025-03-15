@@ -12,7 +12,7 @@ export default function MessengerButton() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 flex items-center space-x-2">
+    <div className="fixed bottom-10 right-4 flex items-center space-x-2">
       {/* Hộp chứa chữ "Chat with us" + Mũi tên */}
       <div className="relative flex items-center bg-pri-1 text-white px-3 py-1 rounded-lg shadow-lg animate-slide-in">
         Chat with us

@@ -26,6 +26,9 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 
 // import types
@@ -34,6 +37,8 @@ import { ICartProduct, IProductVariant } from "@/types/interfaces";
 // import utils
 import { convertNumberToVND } from "@/utils/functions/convert";
 import { DIALOG_DATA } from "@/data/dialog";
+import { putData, postData, getData } from "@/utils/functions/client";
+import { PUBLIC_CUSTOMER_CART_URL } from "@/utils/constants/urls";
 
 export default function RowCart({
   cartIndex,
@@ -52,6 +57,9 @@ export default function RowCart({
   setIsSelectedAll: Dispatch<SetStateAction<boolean>>;
   setDeletedCartProducts: Dispatch<SetStateAction<ICartProduct[]>>;
 }) {
+  const { data: session } = useSession(); // Lấy thông tin session
+  const router = useRouter();
+
   const [variant, setVariant] = useState<IProductVariant>(
     cartProducts[cartIndex].product_variants.find(
       (item) => item._id == cartProducts[cartIndex].variant_id
@@ -121,8 +129,28 @@ export default function RowCart({
     });
   };
 
-  const handleChangeQuantity = (value: number) => {
-    // console.log("quannnnnnnn", value);
+  const handleChangeQuantity = async (value: number) => {
+    console.log("quannnnnnnn", value);
+    // Lấy số lượng hiện tại của sản phẩm
+    const currentQuantity = cartProducts[cartIndex].quantity;
+    // Tính delta: hiệu giữa số lượng mới và số lượng hiện tại
+    const delta = value - currentQuantity;
+    const updatePayloadItem = {
+      ...cartProducts[cartIndex],
+      quantity: delta, // Số lượng gửi đi là delta thay vì giá trị tuyệt đối
+    };
+    console.log("update", updatePayloadItem);
+    try {
+      const data = await putData(PUBLIC_CUSTOMER_CART_URL, {
+        userId: session.user.id,
+        cartProducts: [updatePayloadItem],
+      });
+      console.log("Cập nhật số lượng thành công:", data);
+      // Có thể hiển thị toast thành công nếu cần
+    } catch (error) {
+      console.error("Lỗi cập nhật số lượng:", error);
+      // Có thể hiển thị toast lỗi nếu cần
+    }
 
     setCartProducts((prev: ICartProduct[]) => {
       const updatedCartProducts = prev.map((item, index) =>

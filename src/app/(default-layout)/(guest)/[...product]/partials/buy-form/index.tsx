@@ -66,10 +66,6 @@ export default function CustomerProductBuyForm({
   // Hàm thêm vào giỏ hàng
   const handleAddToCart = async (): Promise<void> => {
     try {
-      // Lấy giỏ hàng hiện tại từ localStorage
-      const existingCart = localStorage.getItem("cart");
-      const cart: ICartProduct[] = existingCart ? JSON.parse(existingCart) : [];
-
       // Tạo sản phẩm mới để thêm vào giỏ hàng
       const selectedVariant = variants[selectedVariantIndex];
       const newCartItem: ICartProduct = {
@@ -80,33 +76,40 @@ export default function CustomerProductBuyForm({
         product_slug: selectedVariant.variant_slug,
       };
 
-      // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng chưa
-      const existingItemIndex = cart.findIndex(
-        (item: ICartProduct) =>
-          item.product_hashed_id === encodeURIComponent(pid) &&
-          item.variant_id === selectedVariant._id
-      );
+      if (!session) {
+        // Nếu người dùng chưa đăng nhập, cập nhật giỏ hàng qua localStorage
+        const existingCart = localStorage.getItem("cart");
+        const cart: ICartProduct[] = existingCart
+          ? JSON.parse(existingCart)
+          : [];
 
-      if (existingItemIndex !== -1) {
-        // Nếu sản phẩm đã tồn tại, cập nhật số lượng
-        cart[existingItemIndex].quantity += inputQuantity;
+        // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng chưa
+        const existingItemIndex = cart.findIndex(
+          (item: ICartProduct) =>
+            item.product_hashed_id === encodeURIComponent(pid) &&
+            item.variant_id === selectedVariant._id
+        );
+
+        if (existingItemIndex !== -1) {
+          // Nếu sản phẩm đã tồn tại, cập nhật số lượng
+          cart[existingItemIndex].quantity += inputQuantity;
+        } else {
+          // Nếu sản phẩm chưa tồn tại, thêm mới
+          cart.push(newCartItem);
+        }
+
+        // Lưu giỏ hàng mới vào localStorage
+        localStorage.setItem("cart", JSON.stringify(cart));
       } else {
-        // Nếu sản phẩm chưa tồn tại, thêm mới
-        cart.push(newCartItem);
-      }
-
-      // Lưu giỏ hàng mới vào localStorage
-      localStorage.setItem("cart", JSON.stringify(cart));
-
-      if (session)
+        // Nếu người dùng đã đăng nhập, cập nhật giỏ hàng trên DB thông qua API
         await putData(PUBLIC_CUSTOMER_CART_URL, {
           userId: session.user.id,
           cartProducts: [newCartItem],
         });
+      }
 
-      // Thông báo thành công
+      // Thông báo thành công qua modal
       setIsModalOpen(true);
-
       setTimeout(() => {
         setIsModalOpen(false);
       }, 3000);

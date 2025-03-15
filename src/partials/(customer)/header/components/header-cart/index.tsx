@@ -21,7 +21,7 @@ export default function CustomerHeaderCart() {
   useEffect(() => {
     const fetchData = async () => {
       const localCartData = JSON.parse(localStorage.getItem("cart")) || [];
-      localStorage.removeItem("cart");
+      // localStorage.removeItem("cart");
 
       const cartData = await postData(
         `${PUBLIC_CUSTOMER_CART_URL}/${session ? session.user.id : "undefined"}`,
