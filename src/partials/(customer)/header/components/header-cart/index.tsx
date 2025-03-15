@@ -75,6 +75,7 @@ export default function CustomerHeaderCart() {
             {cartProducts && cartProducts.length > 0 ? (
               cartProducts.map((cartProduct, index) => (
                 <li
+                  key={index}
                   className="p-4 flex hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                   onClick={() =>
                     router.push(
