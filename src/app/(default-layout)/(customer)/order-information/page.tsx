@@ -5,8 +5,9 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
-import { ChevronRight, Ticket } from "lucide-react";
+import { ChevronRight, Ticket, MapPin } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { Badge } from "@/components/ui/badge";
 
 // import components
 import { Input } from "@/components/ui/input";
@@ -290,150 +291,186 @@ export default function OrderInformationPage() {
   return (
     <div className="container mx-auto grid grid-cols-1 lg:grid-cols-5 gap-6">
       {/* Thông tin người nhận hàng */}
-      <section className="lg:col-span-3 rounded-lg p-6 shadow-md dark:bg-gray-800">
-        <h3 className="font-bold mb-2 text-center">
-          Thông tin người nhận hàng
-        </h3>
-        <hr className="mb-4 dark:border-white" />
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium">Họ và tên</label>
-            <Input
-              type="text"
-              placeholder="Nhập họ và tên"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              maxLength={50}
-              name="userName"
-              className="border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium">Số điện thoại</label>
-            <Input
-              type="text"
-              placeholder="Nhập số điện thoại"
-              value={userPhone}
-              onChange={(e) => setUserPhone(e.target.value)}
-              maxLength={10}
-              className="border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm"
-              name="userPhone"
-            />
-          </div>
-          <div className="flex flex-col md:col-span-2 gap-2">
-            <label className="text-sm font-medium">Địa chỉ</label>
-            <div className="grid grid-cols-2 gap-2">
-              <Select
-                value={cities.find((city) => city.Name === selectedCity)?.Id}
-                onValueChange={handleCityChange}
-                name="city">
-                <SelectTrigger className="border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm">
-                  <SelectValue placeholder="Chọn tỉnh/thành phố" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {cities.map((city) => (
-                      <SelectItem key={city.Id} value={city.Id}>
-                        {city.Name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+      <section className="lg:col-span-3 rounded-lg p-6 shadow-md dark:bg-gray-800 bg-white">
+        {session ? (
+          <div className="border p-4 rounded-md ">
+            <div className="flex justify-between">
+              <h3 className="font-bold mb-2 flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Địa chỉ nhận hàng
+              </h3>
 
-              <Select
-                onValueChange={handleDistrictChange}
-                value={
-                  districts.find(
-                    (district) => district.Name === selectedDistrict
-                  )?.Id
-                }
-                disabled={!districts.length && selectedCity == ""}
-                name="district">
-                <SelectTrigger className="border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm">
-                  <SelectValue placeholder="Chọn quận/huyện" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {districts.map((district) => (
-                      <SelectItem key={district.Id} value={district.Id}>
-                        {district.Name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="default"
+                  className="bg-pri-7 text-primary-foreground">
+                  Mặc định
+                </Badge>
 
-              <Select
-                onValueChange={handleWardChange}
-                value={wards.find((ward) => ward.Name === selectedWard)?.Id}
-                disabled={!wards.length}
-                name="ward">
-                <SelectTrigger className="w-full border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm">
-                  <SelectValue placeholder="Chọn phường/xã" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {wards.map((ward) => (
-                      <SelectItem key={ward.Id} value={ward.Id}>
-                        {ward.Name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <Input
-                name="streetAddress"
-                type="text"
-                placeholder="Nhập số nhà, đường..."
-                value={streetAddress}
-                onChange={(e) => setStreetAddress(e.target.value)}
-                maxLength={100}
-                className="w-full border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm"
-              />
+                <button className="text-blue-500">Thay Đổi</button>
+              </div>
             </div>
+            <div className="mt-2 flex justify-between">
+              <div>
+                <strong>Thùy Trinh - 03151545645</strong> <br />
+                <span className="font-bold">{userPhone}</span>
+                <p>
+                  Thành phố Hải Phòng, Quận Lê Chân, Phường Lam Sơn, nha tui
+                  nnnnnnnkkjk
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <h3 className="font-bold mb-2 text-center">
+              Thông tin người nhận hàng
+            </h3>
+            <hr className="mb-4 dark:border-white" />
+            <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Họ và tên</label>
+                <Input
+                  type="text"
+                  placeholder="Nhập họ và tên"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  maxLength={50}
+                  name="userName"
+                  className="border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Số điện thoại</label>
+                <Input
+                  type="text"
+                  placeholder="Nhập số điện thoại"
+                  value={userPhone}
+                  onChange={(e) => setUserPhone(e.target.value)}
+                  maxLength={10}
+                  className="border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm"
+                  name="userPhone"
+                />
+              </div>
+              <div className="flex flex-col md:col-span-2 gap-2">
+                <label className="text-sm font-medium">Địa chỉ</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Select
+                    value={
+                      cities.find((city) => city.Name === selectedCity)?.Id
+                    }
+                    onValueChange={handleCityChange}
+                    name="city">
+                    <SelectTrigger className="border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm">
+                      <SelectValue placeholder="Chọn tỉnh/thành phố" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {cities.map((city) => (
+                          <SelectItem key={city.Id} value={city.Id}>
+                            {city.Name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
 
-            <div className="w-full flex gap-2">
-              {addresses.map((address, index) => (
-                <button
-                  key={`saved location ${index}`}
-                  title={`${address.detail_address}, ${address.ward.name}, ${address.district.name}, ${address.province.name}`}
-                  type="button"
-                  className="p-2 text-sm w-[30%] border-2 rounded-lg bg-transparent dark:bg-pri-7 border-pri-1/40 hover:bg-pri-2 hover:text-gray-600 dark:border-pri-7 dark:hover:text-black"
-                  onClick={() => {
-                    handleCityChange(
-                      cities.find((city) => city.Name === address.province.name)
-                        ?.Id
-                    );
-                    handleDistrictChange(
+                  <Select
+                    onValueChange={handleDistrictChange}
+                    value={
                       districts.find(
-                        (district) => district.Name == address.district.name
+                        (district) => district.Name === selectedDistrict
                       )?.Id
-                    );
-                    handleWardChange(
-                      wards.find((ward) => ward.Name == address.ward.name)?.Id
-                    );
-                    setStreetAddress(address.detail_address);
-                  }}>
-                  <span className="line-clamp-1">{`${address.detail_address}, ${address.ward.name}, ${address.district.name}, ${address.province.name}`}</span>
-                </button>
-              ))}
-            </div>
+                    }
+                    disabled={!districts.length && selectedCity == ""}
+                    name="district">
+                    <SelectTrigger className="border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm">
+                      <SelectValue placeholder="Chọn quận/huyện" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {districts.map((district) => (
+                          <SelectItem key={district.Id} value={district.Id}>
+                            {district.Name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
 
-            <div className="flex flex-col md:col-span-2 gap-2">
-              <label className="text-sm font-medium">Ghi chú</label>
-              <Textarea
-                name="orderNote"
-                placeholder="Nhập ghi chú cho đơn hàng..."
-                maxLength={100}
-                rows={5}
-                value={orderNote}
-                onChange={(e) => setOrderNote(e.target.value)}
-                className="border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm"></Textarea>
-            </div>
-          </div>
-        </form>
+                  <Select
+                    onValueChange={handleWardChange}
+                    value={wards.find((ward) => ward.Name === selectedWard)?.Id}
+                    disabled={!wards.length}
+                    name="ward">
+                    <SelectTrigger className="w-full border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm">
+                      <SelectValue placeholder="Chọn phường/xã" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {wards.map((ward) => (
+                          <SelectItem key={ward.Id} value={ward.Id}>
+                            {ward.Name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    name="streetAddress"
+                    type="text"
+                    placeholder="Nhập số nhà, đường..."
+                    value={streetAddress}
+                    onChange={(e) => setStreetAddress(e.target.value)}
+                    maxLength={100}
+                    className="w-full border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm"
+                  />
+                </div>
 
+                <div className="w-full flex gap-2">
+                  {addresses.map((address, index) => (
+                    <button
+                      key={`saved location ${index}`}
+                      title={`${address.detail_address}, ${address.ward.name}, ${address.district.name}, ${address.province.name}`}
+                      type="button"
+                      className="p-2 text-sm w-[30%] border-2 rounded-lg bg-transparent dark:bg-pri-7 border-pri-1/40 hover:bg-pri-2 hover:text-gray-600 dark:border-pri-7 dark:hover:text-black"
+                      onClick={() => {
+                        handleCityChange(
+                          cities.find(
+                            (city) => city.Name === address.province.name
+                          )?.Id
+                        );
+                        handleDistrictChange(
+                          districts.find(
+                            (district) => district.Name == address.district.name
+                          )?.Id
+                        );
+                        handleWardChange(
+                          wards.find((ward) => ward.Name == address.ward.name)
+                            ?.Id
+                        );
+                        setStreetAddress(address.detail_address);
+                      }}>
+                      <span className="line-clamp-1">{`${address.detail_address}, ${address.ward.name}, ${address.district.name}, ${address.province.name}`}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex flex-col md:col-span-2 gap-2">
+                  <label className="text-sm font-medium">Ghi chú</label>
+                  <Textarea
+                    name="orderNote"
+                    placeholder="Nhập ghi chú cho đơn hàng..."
+                    maxLength={100}
+                    rows={5}
+                    value={orderNote}
+                    onChange={(e) => setOrderNote(e.target.value)}
+                    className="border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-md p-3 text-sm"></Textarea>
+                </div>
+              </div>
+            </form>
+          </>
+        )}
         {/* Mã giảm giá */}
         <div className="mt-6">
           <h3 className="font-bold mb-2 text-center">Phiếu giảm giá</h3>

@@ -82,14 +82,15 @@ export default function CartPage() {
         return;
       }
 
-      // console.log("aaaaaaaaaa", PUBLIC_CUSTOMER_CART_URL, userCart);
       const data = await postData(PUBLIC_CUSTOMER_CART_URL, userCart);
+      console.log("aaaaaaaaaa", data.products);
 
       setCartProducts(data.products);
       setDefaultCartProducts(data.products);
       setIsFetched(true);
-      if (session) {
+      if (session && session.user.id) {
         localStorage.removeItem("cart");
+        console.log("đã xóa");
       }
     };
 

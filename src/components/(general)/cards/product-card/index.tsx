@@ -8,6 +8,7 @@ import Link from "next/link";
 import { CustomerStarRating } from "@/components";
 import { convertNumberToVND } from "@/utils/functions/convert";
 import clsx from "clsx"; // Giúp xử lý việc gộp class
+import Image from "next/image";
 
 interface ProductCardProps {
   product: IProductProps;
@@ -31,7 +32,14 @@ export default function ProductCard({ product, className }: ProductCardProps) {
       ) : null}
       {/* Product Image */}
       <div className="flex justify-center">
-        <CldImage
+        {/* <CldImage
+          src={product.product_img || product.product_imgs[0]}
+          alt={product.product_slug}
+          width={200}
+          height={200}
+          className="h-[212px] w-full object-contain rounded-md"
+        /> */}
+        <Image
           src={product.product_img || product.product_imgs[0]}
           alt={product.product_slug}
           width={200}

@@ -15,13 +15,13 @@ export default function CustomerHeaderCart() {
   const { data: session } = useSession(); // Lấy thông tin session
   const [cartProducts, setCartProducts] = useState<ICartProduct[]>([]);
   const [isFetched, setIsFetched] = useState<boolean>(false);
+  const [totalItems, setTotalItems] = useState(0);
 
   const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
       const localCartData = JSON.parse(localStorage.getItem("cart")) || [];
-      // localStorage.removeItem("cart");
 
       const cartData = await postData(
         `${PUBLIC_CUSTOMER_CART_URL}/${session ? session.user.id : "undefined"}`,
@@ -38,6 +38,7 @@ export default function CustomerHeaderCart() {
       const data = await postData(PUBLIC_CUSTOMER_CART_URL, userCart);
       console.log("cart", data.products);
       setCartProducts(data.products);
+      setTotalItems(userCart.length);
       setIsFetched(true);
     };
 
@@ -53,7 +54,7 @@ export default function CustomerHeaderCart() {
         <div className="relative flex">
           <ShoppingBag />
           <span className="absolute top-3 left-4 bg-orange-500 text-white text-[8px] font-medium w-4 h-4 flex items-center justify-center rounded-full">
-            12
+            {totalItems || 0}
           </span>
         </div>
         <span className="ml-2 font-semibold tablet:block laptop:block desktop:block">

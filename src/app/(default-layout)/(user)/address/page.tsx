@@ -125,7 +125,7 @@ export default function DeliveryAddress() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}>
                 <Card
-                  className={`relative ${address.is_default ? "border-2 border-pri-7 border-dashed" : ""} bg-gray-800 transition-all duration-300 ease-in-out hover:shadow-md`}>
+                  className={`relative ${address.is_default ? "border-2 border-pri-7 border-dashed" : ""} dark:bg-gray-800 transition-all duration-300 ease-in-out hover:shadow-md`}>
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start gap-4">
                       <div className="space-y-2 flex-1">
