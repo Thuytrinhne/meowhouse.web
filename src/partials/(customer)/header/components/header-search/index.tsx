@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { IProductProps } from "@/types/interfaces";
 import Link from "next/link";
-import { CldImage } from "next-cloudinary";
+import Image from "next/image";
 import { PUBLIC_CUSTOMER_PRODUCT_LIST_URL } from "@/utils/constants/urls";
 import { convertNumberToVND } from "@/utils/functions/convert";
 
@@ -112,14 +112,12 @@ export default function CustomerHeaderSearch() {
                       )}
                     </div>
                   </div>
-                  <CldImage
+                  <Image
                     src={product.product_img || "/imgs/test.jpg"}
                     alt={product.product_name}
                     width={40}
                     height={40}
-                    className="rounded mr-2 object-cover w-[40px] h-[40px]"
-                    crop="fill"
-                    gravity="auto"
+                    className="rounded mr-2 w-[40px] h-[40px] object-cover"
                   />
                 </li>
               </Link>

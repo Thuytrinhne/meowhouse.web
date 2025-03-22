@@ -1,7 +1,7 @@
 import React from "react";
 import { Check } from "lucide-react";
 import { cn } from "@/libs/utils";
-import { CldImage } from "next-cloudinary";
+import Image from "next/image";
 
 const RenderOption: React.FC<{
   option: { value?: string; _id?: string; name?: string; img?: string };
@@ -53,11 +53,7 @@ const RenderOption: React.FC<{
             {option.img && (
               <div className="relative w-full aspect-square">
                 {option.img.startsWith("SEO_Images") ? (
-                  <CldImage
-                    alt={option.name ?? ""}
-                    src={option.img}
-                    fill={true}
-                  />
+                  <Image alt={option.name ?? ""} src={option.img} fill={true} />
                 ) : (
                   <img alt={option.name} src={option.img} />
                 )}

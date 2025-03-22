@@ -84,12 +84,17 @@ export default function CustomerHeaderCart() {
                     )
                   }>
                   <Image
-                    src={cartProduct.product_variants[0].variant_img}
-                    alt="/imgs/test.jpg"
+                    src={
+                      cartProduct.product_variants.find(
+                        (v) => v._id === cartProduct.variant_id
+                      )?.variant_img || "/imgs/default.jpg"
+                    }
+                    alt={cartProduct.product_name}
                     width={50}
                     height={50}
                     className="rounded mr-3 object-cover w-[50px] h-[50px]"
                   />
+
                   <div>
                     <p className="text-sm text-gray-700 dark:text-white font-semibold">
                       {cartProduct.product_name}

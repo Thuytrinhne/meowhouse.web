@@ -15,6 +15,7 @@ import OrderProductItem from "@/components/(order)/order-product-item";
 import StatusBadge from "@/components/(order)/status-badge";
 import OrderActions from "@/components/(order)/order-actions";
 import { putData } from "@/utils/functions/client";
+import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 
 interface OrderProduct {
   product_id: string;
@@ -67,6 +68,13 @@ interface OrdersResponse {
   };
 }
 
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+}
+
 // Thêm hàm tính giá sau khi giảm giá
 const calculateDiscountedPrice = (price: number, discountPercent: number) => {
   return price * (1 - discountPercent / 100);
@@ -87,10 +95,22 @@ const isValidOrderId = (str: string) => /^DH/.test(str);
 export default function HistoryOrder() {
   const searchParams = useSearchParams();
 
+  const currentPage = parseInt((searchParams.get("page") as string) || "1");
+  const postsPerPage = parseInt(
+    (searchParams.get("pageSize") as string) || "10"
+  );
+
   const { data: session } = useSession();
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    total_pages: 0,
+  });
+
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -135,14 +155,14 @@ export default function HistoryOrder() {
   }, [session, activeTab, activeTab === "all" ? debouncedValue : null]);
 
   const fetchOrders = async () => {
-    if (!session?.user?.accessToken) {
+    if (!session && !session?.user?.accessToken) {
       setIsLoading(false);
       return;
     }
     try {
       setIsLoading(true);
 
-      let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders`;
+      let url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/orders?page=${currentPage}&limit=${postsPerPage}`;
 
       // Xử lý params dựa vào activeTab và searchTerm
       if (activeTab !== "all") {
@@ -174,12 +194,13 @@ export default function HistoryOrder() {
         });
         throw new Error(errorData?.message || "Failed to fetch orders");
       }
-      const responseData: OrdersResponse = await response.json();
+      const responseData = await response.json();
       if (!responseData.success) {
         throw new Error("Failed to fetch orders");
       }
-      // console.log("order data", responseData.data.orders);
+      console.log("order data", responseData.data.pagination);
       setOrders(responseData.data.orders);
+      setPagination(responseData.data.pagination);
       setIsLoading(false);
 
       const resetCounts = {
@@ -481,6 +502,18 @@ export default function HistoryOrder() {
             )}
           </Tabs>
         </CardContent>
+        <div className="p-4">
+          {pagination && (
+            <PaginationWithLinks
+              page={currentPage}
+              pageSize={postsPerPage}
+              totalCount={pagination.total}
+              pageSizeSelectOptions={{
+                pageSizeOptions: [5, 10, 25, 50],
+              }}
+            />
+          )}
+        </div>
       </Card>
     </>
   );

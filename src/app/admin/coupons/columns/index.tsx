@@ -1,8 +1,6 @@
 "use client";
 
 // import libs
-import { CldImage } from "next-cloudinary";
-import { ArrowUpDown, Filter } from "lucide-react";
 import {
   CellContext,
   Column,

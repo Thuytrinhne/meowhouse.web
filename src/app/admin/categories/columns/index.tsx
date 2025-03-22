@@ -1,8 +1,7 @@
 "use client";
 
 // import libs
-import { CldImage } from "next-cloudinary";
-import { ArrowUpDown, Filter } from "lucide-react";
+import Image from "next/image";
 import {
   CellContext,
   Column,
@@ -103,7 +102,7 @@ const CellHandler = ({ row, type }: IAdminTableHandler<IAdminCategory>) => {
             href={`/admin/categories/${row?.original._id}`}
             className="w-fit h-fit aspect-square">
             <div className="relative w-20 h-20 aspect-square">
-              <CldImage
+              <Image
                 className="object-cover aspect-square"
                 src={row?.original.category_img as string}
                 alt={row?.original.category_name as string}

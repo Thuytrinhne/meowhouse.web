@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { CloudUpload, ChevronDown, Pencil, X } from "lucide-react";
+import Image from "next/image";
 
 // Import components
 import {
@@ -42,7 +43,10 @@ const DropZoneSingleImg = ({
     const previousImageUrl = previewImg;
 
     // Xoá hình ảnh cũ trước khi thêm hình ảnh mới
-    if (previousImageUrl && previousImageUrl.startsWith("https://res.cloudinary.com")) {
+    if (
+      previousImageUrl &&
+      previousImageUrl.startsWith("https://res.cloudinary.com")
+    ) {
       onDelete((prevState: any) => [...prevState, previousImageUrl]);
     }
 
@@ -76,8 +80,7 @@ const DropZoneSingleImg = ({
             type="button"
             variant="ghost"
             className="text-pri-7"
-            onClick={() => setImgLink(previewImg)}
-          >
+            onClick={() => setImgLink(previewImg)}>
             {DROPZONE_DATA["images-urls"]}
             <ChevronDown />
           </Button>
@@ -91,8 +94,12 @@ const DropZoneSingleImg = ({
           <Input
             value={imgLink}
             onChange={(e) => setImgLink(e.target.value)}
-            onDoubleClick={async () => setImgLink(await navigator.clipboard.readText())}
-            onPaste={async () => setImgLink(await navigator.clipboard.readText())}
+            onDoubleClick={async () =>
+              setImgLink(await navigator.clipboard.readText())
+            }
+            onPaste={async () =>
+              setImgLink(await navigator.clipboard.readText())
+            }
             onKeyDown={(e) => {
               if (e.key === "Backspace") setImgLink("");
             }}
@@ -101,7 +108,10 @@ const DropZoneSingleImg = ({
           />
 
           <DialogFooter className="flex flex-row !justify-between">
-            <Button type="button" variant="ghost" onClick={() => setOpenPopup(false)}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setOpenPopup(false)}>
               {DIALOG_DATA["close-btn"]}
             </Button>
             <Button
@@ -114,8 +124,7 @@ const DropZoneSingleImg = ({
                 }
                 setOpenPopup(false);
                 setImgLink("");
-              }}
-            >
+              }}>
               {DIALOG_DATA["images-add"]}
             </Button>
           </DialogFooter>
@@ -126,13 +135,12 @@ const DropZoneSingleImg = ({
         {...getRootProps({
           className:
             "relative aspect-square max-h-[50dvh] rounded-md w-full flex justify-center transition bg-pri-2/20 border-2 border-dashed dark:border-zinc-400 dark:hover:border-slate-50 appearance-none cursor-pointer hover:border-zinc-400 focus:outline-none",
-        })}
-      >
+        })}>
         {previewImg ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {previewImg.startsWith("SEO_Images") ? (
-              <CldImage
+              <Image
                 loading="lazy"
                 src={previewImg}
                 alt="preview thumbnail"
@@ -152,8 +160,7 @@ const DropZoneSingleImg = ({
               onClick={(e) => {
                 e.stopPropagation();
                 setDeleteImgOpen(true);
-              }}
-            >
+              }}>
               <X className="w-3 h-3" />
             </div>
             <div className="absolute rounded-full p-1 bottom-1 right-1 bg-zinc-300 dark:bg-zinc-700">
@@ -176,11 +183,16 @@ const DropZoneSingleImg = ({
         <DialogContent className="mxs:max-w-md">
           <DialogHeader>
             <DialogTitle>{DIALOG_DATA["delete-image-btn"]}</DialogTitle>
-            <DialogDescription>{DIALOG_DATA["submit-content"]}</DialogDescription>
+            <DialogDescription>
+              {DIALOG_DATA["submit-content"]}
+            </DialogDescription>
           </DialogHeader>
 
           <DialogFooter className="flex flex-row !justify-between">
-            <Button type="button" variant="default" onClick={() => setDeleteImgOpen(false)}>
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => setDeleteImgOpen(false)}>
               {DIALOG_DATA["close-btn"]}
             </Button>
             <Button
@@ -189,8 +201,7 @@ const DropZoneSingleImg = ({
               onClick={() => {
                 handleDeleteImage();
                 setDeleteImgOpen(false);
-              }}
-            >
+              }}>
               {DIALOG_DATA["delete-btn"]}
             </Button>
           </DialogFooter>

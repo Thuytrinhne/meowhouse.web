@@ -21,23 +21,23 @@ const testimonials = [
     author: "Thùy Trinh",
     details: "Mèo Lucky, 5 tuổi",
     rating: 5,
-    avatar: "/imgs/home/avt.jpg",
+    avatar: "/imgs/home/avt0.jpg",
   },
   {
     id: 2,
     text: "Chất lượng của sản phẩm này vượt quá mong đợi của tôi. Rất khuyến khích cho tất cả các chủ nuôi thú cưng!",
-    author: "Hải Yến",
+    author: "Sún",
     details: "Whiskers, 3 tuổi",
     rating: 5,
-    avatar: "/imgs/home/avt.jpg",
+    avatar: "/imgs/home/avt1.jpg",
   },
   {
     id: 3,
     text: "Mèo của tôi đã không thích ăn trong một thời gian dài, nhưng từ khi thử loại thức ăn này, cô ấy ăn rất ngon miệng. Tôi thật sự hài lòng và sẽ mua lại!",
-    author: "Đức Mạnh",
+    author: "Tuấn Ngọc",
     details: "Mèo Simba, 4 tuổi",
     rating: 5,
-    avatar: "/imgs/home/avt.jpg",
+    avatar: "/imgs/home/avt2.jpg",
   },
 ];
 
@@ -71,7 +71,7 @@ export default function ClientFeedback() {
                 key={i}
                 className="relative w-10 h-10 rounded-full border-2 border-background overflow-hidden">
                 <Image
-                  src={`/imgs/home/avt.jpg`}
+                  src={`/imgs/home/avt${i}.jpg`} // Thay đổi đường dẫn file ảnh
                   alt={`Reviewer ${i + 1}`}
                   fill
                   className="object-cover"

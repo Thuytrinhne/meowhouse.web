@@ -332,7 +332,7 @@ export default function CartPage() {
       JSON.stringify(updatedProductsArray)
     );
 
-    location.href = "/order-information";
+    router.push("/order-information?from_cart=true");
 
     // console.log("Saved to localStorage:", updatedProductsArray);
   };

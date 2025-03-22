@@ -1,6 +1,5 @@
 "use client";
 
-import { CldImage } from "next-cloudinary";
 import Image from "next/image";
 
 interface IVariant {
@@ -32,7 +31,7 @@ export default function ProductVariant({
           : "border border-gray-300"
       } rounded-md hover:border-pri-7 hover:shadow-lg transition-all duration-300 ease-in-out cursor-pointer w-26 h-26`}>
       {/* Ảnh variant */}
-      <CldImage
+      <Image
         src={variant.image.url}
         alt={variant.image.alt}
         width={90}

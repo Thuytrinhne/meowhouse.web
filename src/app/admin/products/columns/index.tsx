@@ -1,7 +1,7 @@
 "use client";
 
 // import libs
-import { ArrowUpDown, Filter } from "lucide-react";
+import Image from "next/image";
 import {
   CellContext,
   Column,
@@ -12,7 +12,6 @@ import {
 } from "@tanstack/react-table";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CldImage } from "next-cloudinary";
 
 // import components
 import { Checkbox } from "@/components/ui/checkbox";
@@ -112,7 +111,7 @@ const CellHandler = ({ row, type }: IAdminTableHandler<IAdminProduct>) => {
             href={`/admin/products/${row?.original._id}`}
             className="w-fit h-fit aspect-square">
             <div className="relative w-20 h-20 aspect-square">
-              <CldImage
+              <Image
                 className="object-cover aspect-square"
                 src={row?.original.product_img as string}
                 alt={row?.original.product_name as string}

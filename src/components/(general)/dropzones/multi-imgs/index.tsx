@@ -6,6 +6,7 @@ import { CloudUpload, ChevronDown, Plus, X } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useState, useEffect } from "react";
 import { FreeMode, Navigation, Thumbs } from "swiper/modules";
+import Image from "next/image";
 
 // import components
 import {
@@ -38,7 +39,9 @@ const DropZoneMultiImgs = ({
   //     value.filter((url) => url != "")
   //   );
 
-  const [imagePreviews, setImagePreviews] = useState<string[]>(value.filter((url) => url != ""));
+  const [imagePreviews, setImagePreviews] = useState<string[]>(
+    value.filter((url) => url != "")
+  );
   const [imageLinks, setImageLinks] = useState<string[]>([...imagePreviews]);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [deleteImgOpen, setDeleteImgOpen] = useState(false);
@@ -90,8 +93,7 @@ const DropZoneMultiImgs = ({
               className="text-pri-7"
               onClick={() => {
                 setImageLinks([...imagePreviews]);
-              }}
-            >
+              }}>
               {DROPZONE_DATA["images-urls"]}
               <ChevronDown />
             </Button>
@@ -139,14 +141,16 @@ const DropZoneMultiImgs = ({
                 type="button"
                 variant="none"
                 className="w-fit px-0 flex flex-row gap-1 items-center font-bold text-blue-600 hover:text-blue-400 dark:text-sky-500 dark:hover:text-sky-400"
-                onClick={() => setImageLinks([...imageLinks, ""])}
-              >
+                onClick={() => setImageLinks([...imageLinks, ""])}>
                 <Plus className="h-5 w-5" /> {DROPZONE_DATA["image-add"]}
               </Button>
             </div>
 
             <DialogFooter className="flex flex-row !justify-between">
-              <Button type="button" variant="ghost" onClick={() => setOpenPopup(false)}>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setOpenPopup(false)}>
                 {DIALOG_DATA["close-btn"]}
               </Button>
               <Button
@@ -159,8 +163,7 @@ const DropZoneMultiImgs = ({
                   );
                   setImagePreviews([...imgs]);
                   setImageLinks([]);
-                }}
-              >
+                }}>
                 {DROPZONE_DATA["images-add"]}
               </Button>
             </DialogFooter>
@@ -173,8 +176,7 @@ const DropZoneMultiImgs = ({
           {...getRootProps({
             className:
               "w-full flex justify-center h-32 transition bg-pri-2/20 border-2 border-grounded-2xly-300 border-dashed dark:border-zinc-400 dark:hover:border-slate-50 rounded-md appearance-none cursor-pointer hover:border-zinc-400 focus:outline-none",
-          })}
-        >
+          })}>
           <span className="flex flex-col justify-center items-center gap-1">
             <CloudUpload />
             <span className="font-medium text-base text-zinc-800 dark:text-zinc-200">
@@ -200,11 +202,13 @@ const DropZoneMultiImgs = ({
             spaceBetween={10}
             navigation={true}
             thumbs={{
-              swiper: thumbsSwiper && !(thumbsSwiper as any).destroyed ? thumbsSwiper : null,
+              swiper:
+                thumbsSwiper && !(thumbsSwiper as any).destroyed
+                  ? thumbsSwiper
+                  : null,
             }}
             modules={[FreeMode, Navigation, Thumbs]}
-            className={`relative mb-2`}
-          >
+            className={`relative mb-2`}>
             {imagePreviews.map((src, index) => (
               <SwiperSlide key={`preview img ${index}`}>
                 <div className="relative">
@@ -212,11 +216,10 @@ const DropZoneMultiImgs = ({
                     className="relative aspect-[16/9] cursor-pointer"
                     onClick={() => {
                       window.open(src, "_blank");
-                    }}
-                  >
+                    }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     {src.startsWith("SEO_Images") ? (
-                      <CldImage
+                      <Image
                         loading="lazy"
                         src={src}
                         alt={`preview ${index}`}
@@ -237,8 +240,7 @@ const DropZoneMultiImgs = ({
                     onClick={() => {
                       setDeleteImgOpen(true);
                       setImgIndex(index);
-                    }}
-                  >
+                    }}>
                     <X className="w-3 h-3" />
                   </div>
                 </div>
@@ -255,15 +257,14 @@ const DropZoneMultiImgs = ({
             centeredSlides={true}
             watchSlidesProgress={true}
             modules={[FreeMode, Navigation, Thumbs]}
-            className="relative h-fit"
-          >
+            className="relative h-fit">
             {imagePreviews.map((src, index) => (
               <SwiperSlide key={`preview thumb ${index}`}>
                 <div className="relative">
                   <div className="relative w-full aspect-[16/9]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     {src.startsWith("SEO_Images") ? (
-                      <CldImage
+                      <Image
                         loading="lazy"
                         src={src}
                         alt={`preview thumbnails ${index}`}
@@ -284,8 +285,7 @@ const DropZoneMultiImgs = ({
                     onClick={() => {
                       setDeleteImgOpen(true);
                       setImgIndex(index);
-                    }}
-                  >
+                    }}>
                     <X className="w-3 h-3" />
                   </div>
                 </div>
@@ -299,11 +299,16 @@ const DropZoneMultiImgs = ({
           <DialogContent className="mxs:max-w-md">
             <DialogHeader>
               <DialogTitle>{DIALOG_DATA["delete-image-btn"]}</DialogTitle>
-              <DialogDescription>{DIALOG_DATA["submit-content"]}</DialogDescription>
+              <DialogDescription>
+                {DIALOG_DATA["submit-content"]}
+              </DialogDescription>
             </DialogHeader>
 
             <DialogFooter className="flex flex-row !justify-between">
-              <Button type="button" variant="default" onClick={() => setDeleteImgOpen(false)}>
+              <Button
+                type="button"
+                variant="default"
+                onClick={() => setDeleteImgOpen(false)}>
                 {DIALOG_DATA["close-btn"]}
               </Button>
               <Button
@@ -311,8 +316,7 @@ const DropZoneMultiImgs = ({
                 variant="default"
                 onClick={() => {
                   if (imgIndex != -1) handleDeleteImage(imgIndex);
-                }}
-              >
+                }}>
                 {DIALOG_DATA["delete-btn"]}
               </Button>
             </DialogFooter>

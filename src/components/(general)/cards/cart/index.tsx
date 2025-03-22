@@ -2,7 +2,6 @@
 
 // import libs
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { CldImage } from "next-cloudinary";
 import Image from "next/image";
 import { Eraser } from "lucide-react";
 
@@ -247,7 +246,7 @@ export default function RowCart({
           <a
             href={`/${cartProducts[cartIndex].product_slug}?pid=${cartProducts[cartIndex].product_hashed_id}`}
             className="relative ml:w-[60px] md:w-[72px] lg:w-[100px] aspect-square">
-            <CldImage
+            <Image
               src={variant.variant_img}
               alt={variant.variant_name}
               fill={true}

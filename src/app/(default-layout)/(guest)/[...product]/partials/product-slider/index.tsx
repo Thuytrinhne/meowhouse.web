@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { CldImage } from "next-cloudinary";
 import Modal from "react-modal";
+import Image from "next/image";
 
 interface SliderImgProps {
   SliderImgs: string[];
@@ -69,8 +69,8 @@ export default function CustomerProductSlider({ SliderImgs }: SliderImgProps) {
         className="relative w-full h-[440px] overflow-hidden dark:bg-white cursor-pointer"
         onClick={handleMainImageClick}>
         <div className="absolute inset-0 border border-neutral-300">
-          <CldImage
-            src={SliderImgs[currentIndex]}
+          <Image
+            src={SliderImgs[currentIndex]} // Đường dẫn ảnh từ mảng SliderImgs
             alt="picture"
             fill
             className="object-contain"
@@ -114,14 +114,14 @@ export default function CustomerProductSlider({ SliderImgs }: SliderImgProps) {
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               onClick={() => handleThumbnailClick(index)}>
-              <CldImage src={img} alt="picture" fill className="object-cover" />
+              <Image src={img} alt="picture" fill className="object-cover" />
             </div>
           ))}
           {SliderImgs.length > 5 && (
             <div
               className="relative w-20 h-20 cursor-pointer"
               onClick={handleMainImageClick}>
-              <CldImage
+              <Image
                 src={SliderImgs[4]}
                 alt="picture"
                 fill
@@ -154,7 +154,7 @@ export default function CustomerProductSlider({ SliderImgs }: SliderImgProps) {
           className="relative w-full h-[460px] overflow-hidden dark:bg-gray-800"
           onClick={handleMainImageClick}>
           <div className="absolute inset-0 mb-8">
-            <CldImage
+            <Image
               src={SliderImgs[currentIndex]}
               alt="picture"
               fill
@@ -196,7 +196,7 @@ export default function CustomerProductSlider({ SliderImgs }: SliderImgProps) {
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               onClick={() => handleThumbnailClick(index)}>
-              <CldImage
+              <Image
                 src={img}
                 alt="picture"
                 fill

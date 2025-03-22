@@ -1,4 +1,4 @@
-import { CldImage } from "next-cloudinary";
+import Image from "next/image";
 
 interface OrderProduct {
   product_id: string;
@@ -25,7 +25,7 @@ export default function OrderProductItem({ product }: OrderProductItemProps) {
     <div className="flex items-center gap-4 p-4 border rounded-lg dark:border-gray-600">
       <div className="relative w-24 h-24">
         {product.variant_img.startsWith("SEO_Images") ? (
-          <CldImage
+          <Image
             loading="lazy"
             src={product.variant_img}
             alt={product.variant_name}
