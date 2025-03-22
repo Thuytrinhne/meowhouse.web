@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
-import { ChevronRight, Ticket, MapPin } from "lucide-react";
+import { ChevronRight, Ticket, MapPin, CreditCard, Wallet } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 
@@ -30,6 +30,7 @@ import { SHIPPING_COST } from "@/utils/constants/variables";
 // import types
 import { IOrderProduct } from "@/types/interfaces";
 import { Address } from "@/types/address";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const demoCoupons = [
   {
@@ -67,10 +68,76 @@ export default function OrderInformationPage() {
   const [streetAddress, setStreetAddress] = useState<string>("");
   const [orderNote, setOrderNote] = useState<string>("");
   const [addresses, setAddresses] = useState<Address[]>([]);
+  const [defaultAddress, setDefaultAddresses] = useState<Address>();
+  const [paymentMethod, setPaymentMethod] = useState("cod");
 
   const shippingFee = SHIPPING_COST; // Fixed shipping fee
   const couponDiscount = 0; // Example coupon discount
   const freeShippingDiscount = 0; // Example free shipping discount
+
+  useEffect(() => {
+    const fetchProductInfo = async () => {
+      const savedProducts = localStorage.getItem("buyNowProducts");
+
+      if (savedProducts) {
+        const parsedProducts = JSON.parse(savedProducts);
+
+        try {
+          const response = await fetch(PRODUCT_ORDER_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify(parsedProducts),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch product data");
+          }
+
+          const data = await response.json();
+          // console.log("dataaaaaa", data);
+          // console.log("Fetched products:", data.data.products);
+          setProductInfo(data.data.products); // Lưu thông tin sản phẩm để hiển thị
+        } catch (error) {
+          console.error("Error fetching product data:", error);
+        }
+      }
+    };
+
+    const fetchAddresses = async () => {
+      if (!session?.user?.accessToken) return;
+      try {
+        const response = await fetch(
+          `${USER_URL}/${session?.user?.id}/addresses`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${session.user.accessToken}`,
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          }
+        );
+        const data = await response.json();
+        console.log(data);
+        if (data.success) {
+          setAddresses(data.data);
+          setDefaultAddresses(
+            data.data.find(
+              (address: { is_default: boolean }) => address.is_default
+            )
+          );
+        }
+      } catch (error) {
+        console.error("Failed to fetch addresses:", error);
+      }
+    };
+
+    fetchProductInfo();
+    fetchAddresses();
+  }, [session]);
 
   useEffect(() => {
     // Fetch administrative data
@@ -83,6 +150,17 @@ export default function OrderInformationPage() {
         console.error("Error fetching administrative data:", error)
       );
   }, []);
+
+  useEffect(() => {
+    if (defaultAddress) {
+      setUserName(defaultAddress.full_name || "");
+      setUserPhone(defaultAddress.phone || "");
+      setSelectedCity(defaultAddress.province.name || "");
+      setSelectedDistrict(defaultAddress.district.name || "");
+      setSelectedWard(defaultAddress.ward.name || "");
+      setStreetAddress(defaultAddress.detail_address || "");
+    }
+  }, [defaultAddress]);
 
   const handleCityChange = (value: string) => {
     const selected = cities.find((city) => city.Id === value);
@@ -131,64 +209,6 @@ export default function OrderInformationPage() {
 
     return true;
   };
-
-  useEffect(() => {
-    const fetchProductInfo = async () => {
-      const savedProducts = localStorage.getItem("buyNowProducts");
-
-      if (savedProducts) {
-        const parsedProducts = JSON.parse(savedProducts);
-
-        try {
-          const response = await fetch(PRODUCT_ORDER_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify(parsedProducts),
-          });
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch product data");
-          }
-
-          const data = await response.json();
-          // console.log("dataaaaaa", data);
-          // console.log("Fetched products:", data.data.products);
-          setProductInfo(data.data.products); // Lưu thông tin sản phẩm để hiển thị
-        } catch (error) {
-          console.error("Error fetching product data:", error);
-        }
-      }
-    };
-
-    const fetchAddresses = async () => {
-      if (!session?.user?.accessToken) return;
-      try {
-        const response = await fetch(
-          `${USER_URL}/${session?.user?.id}/addresses`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${session.user.accessToken}`,
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-          }
-        );
-        const data = await response.json();
-        if (data.success) {
-          setAddresses(data.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch addresses:", error);
-      }
-    };
-
-    fetchProductInfo();
-    fetchAddresses();
-  }, []);
 
   const calculateOriginalPrice = () => {
     if (!productInfo || productInfo.length === 0) return 0;
@@ -271,16 +291,29 @@ export default function OrderInformationPage() {
         },
         order_note: orderNote || "",
         shipping_cost: shippingFee,
-        payment_method: "onl",
+        payment_method: paymentMethod,
         cancel_url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/order-history?selectedTab=unpaid`, // Cancel URL
         return_url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/order-success?orderId=${encodeURIComponent(orderId)}`, // Success redirect
       };
-
+      // console.log("dataaaaaaaaa neeeeee", newPaymentData);
+      if (paymentMethod === "cod") {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/payos/create-payment-link`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...newPaymentData, mobile: false }),
+          }
+        );
+        console.log("ressponse", response);
+        if (response.ok) {
+          window.location.href = `/order-success?orderId=${encodeURIComponent(newPaymentData.order_id)}`;
+          return;
+        }
+      }
       // Save payment data to local storage
       localStorage.setItem("paymentData", JSON.stringify(newPaymentData));
-      // console.log("dataaaaaaaaa neeeeee", newPaymentData);
-
-      // Redirect to the payment page
+      // // Redirect to the payment page
       window.location.href = "/payment";
     } catch (error) {
       console.error("Error processing the order:", error);
@@ -292,13 +325,16 @@ export default function OrderInformationPage() {
     <div className="container mx-auto grid grid-cols-1 lg:grid-cols-5 gap-6">
       {/* Thông tin người nhận hàng */}
       <section className="lg:col-span-3 rounded-lg p-6 shadow-md dark:bg-gray-800 bg-white">
-        {session ? (
+        {/* Địa chỉ giao hàng */}
+        <h3 className="font-bold mb-2 text-center">Thông tin nhận hàng</h3>
+        <hr className="mb-4 dark:border-white" />
+        {session && defaultAddress ? (
           <div className="border p-4 rounded-md ">
             <div className="flex justify-between">
-              <h3 className="font-bold mb-2 flex items-center gap-2">
+              <h4 className="font-bold mb-2 flex items-center gap-2">
                 <MapPin className="w-5 h-5" />
                 Địa chỉ nhận hàng
-              </h3>
+              </h4>
 
               <div className="flex items-center gap-2">
                 <Badge
@@ -312,11 +348,11 @@ export default function OrderInformationPage() {
             </div>
             <div className="mt-2 flex justify-between">
               <div>
-                <strong>Thùy Trinh - 03151545645</strong> <br />
-                <span className="font-bold">{userPhone}</span>
+                {defaultAddress.full_name} - {defaultAddress.phone}
+                <br />
                 <p>
-                  Thành phố Hải Phòng, Quận Lê Chân, Phường Lam Sơn, nha tui
-                  nnnnnnnkkjk
+                  {defaultAddress.province.name}, {defaultAddress.district.name}
+                  , {defaultAddress.ward.name}, {defaultAddress.detail_address}
                 </p>
               </div>
             </div>
@@ -471,6 +507,39 @@ export default function OrderInformationPage() {
             </form>
           </>
         )}
+        {/* Phương thức thanh toán */}
+
+        <div className="border p-4 rounded-md mt-4">
+          {/* Header */}
+          <div className="flex justify-between">
+            <h4 className="font-bold mb-2 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-gray-600" />
+              Phương thức thanh toán
+            </h4>
+          </div>
+
+          <div className="mt-2">
+            <RadioGroup
+              value={paymentMethod}
+              onValueChange={setPaymentMethod}
+              className="space-y-2">
+              {/* Thanh toán khi nhận hàng */}
+              <label className="flex items-center gap-2 p-3 border rounded-md cursor-pointer">
+                <RadioGroupItem value="cod" />
+                <Wallet className="w-5 h-5 text-gray-600" />
+                <span>Thanh toán khi nhận hàng (COD)</span>
+              </label>
+
+              {/* Thanh toán online */}
+              <label className="flex items-center gap-2 p-3 border rounded-md cursor-pointer">
+                <RadioGroupItem value="onl" />
+                <CreditCard className="w-5 h-5 text-gray-600" />
+                <span>Thanh toán online</span>
+              </label>
+            </RadioGroup>
+          </div>
+        </div>
+
         {/* Mã giảm giá */}
         <div className="mt-6">
           <h3 className="font-bold mb-2 text-center">Phiếu giảm giá</h3>
