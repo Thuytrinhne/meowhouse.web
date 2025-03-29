@@ -46,6 +46,8 @@ import { ToogleThemeMode } from "@/components";
 
 // import data
 import { ADMIN_SIDE_BAR } from "@/data/components";
+import { Separator } from "@/components/ui/separator";
+import SidebarNotificationItem from "@/components/(admin)/sidebar/sidebar-notification-item";
 
 const sidebarData = [
   {
@@ -216,7 +218,8 @@ export default function AdminSidebar() {
                   </Collapsible>
                 );
               })}
-
+              <Separator className="my-2" />
+              <SidebarNotificationItem></SidebarNotificationItem>
               <Collapsible defaultOpen className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger className="w-full">
