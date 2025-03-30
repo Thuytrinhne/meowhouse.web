@@ -1,28 +1,27 @@
 "use client";
 import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
 import Notification from "@/types/notification";
-import { BACKEND_BASE_URL } from "@/utils/constants/urls";
+import pusher from "@/utils/pusher";
 
 export default function useOrderNotifications() {
-  const [orderNotification, setorderNotification] =
+  const [orderNotification, setOrderNotification] =
     useState<Notification | null>(null);
 
-  const [socket, setSocket] = useState(null);
-
   useEffect(() => {
-    const socketInstance = io(BACKEND_BASE_URL, { path: "/api/socket" });
+    const channel = pusher.subscribe("orders");
+    console.log("📡 Subscribed to channel:", channel.name); // Kiểm tra đăng ký kênh
 
-    setSocket(socketInstance);
-
-    socketInstance.on("orderNotification", (order) => {
-      setorderNotification(order);
+    channel.bind("orderNotification", (order: Notification) => {
+      console.log("📩 Nhận được event:", order);
+      setOrderNotification(order);
     });
 
     return () => {
-      socketInstance.disconnect();
+      //channel.unsubscribe();
+      pusher.unsubscribe("orders");
+      console.log("🚪 Unsubscribed from channel");
     };
   }, []);
 
-  return { orderNotification, socket };
+  return { orderNotification };
 }
