@@ -17,6 +17,7 @@ import { NotificationFilters } from "./notification-filters";
 import { NotificationStats } from "./notification-stats";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
+import { ADMIN_NOTIFICATIONS } from "@/utils/constants/urls";
 
 // Mock data based on the Mongoose schema
 const mockNotifications = [
@@ -92,7 +93,7 @@ export default function NotificationsPage() {
     setError("");
 
     try {
-      const url = "http://localhost:8080/api/admin/notifications";
+      const url = `${ADMIN_NOTIFICATIONS}`;
       const response = await fetch(url, {
         method: "GET",
         headers: {

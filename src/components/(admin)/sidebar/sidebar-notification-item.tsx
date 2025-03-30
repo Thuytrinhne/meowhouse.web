@@ -4,8 +4,9 @@ import { Bell } from "lucide-react";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "next-auth/react";
-
+import { ADMIN_NOTIFICATIONS } from "@/utils/constants/urls";
 import Notification from "@/types/notification";
+
 export default function SidebarNotificationItem() {
   const { data: session } = useSession();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -15,7 +16,7 @@ export default function SidebarNotificationItem() {
       if (!session?.user?.accessToken) return;
 
       try {
-        const url = "http://localhost:8080/api/admin/notifications";
+        const url = `${ADMIN_NOTIFICATIONS}`;
         const response = await fetch(url, {
           method: "GET",
           headers: {
