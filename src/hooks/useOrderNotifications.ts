@@ -11,7 +11,8 @@ export default function useOrderNotifications() {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const socketInstance = io(BACKEND_BASE_URL);
+    const socketInstance = io(BACKEND_BASE_URL, { path: "/api/socket" });
+
     setSocket(socketInstance);
 
     socketInstance.on("orderNotification", (order) => {
