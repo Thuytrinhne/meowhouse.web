@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import {
   ArrowLeft,
@@ -7,36 +8,101 @@ import {
   ChevronDown,
   Phone,
   Mail,
+  Copy,
+  X,
+  Archive,
+  Eye,
+  Pencil,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useParams } from "next/navigation";
+import { fetchData } from "@/utils/functions/server";
+import { ADMIN_ORDER_URL } from "@/utils/constants/urls";
+import { formatDateTime } from "@/utils/functions/convert";
 
 export default function OrderDetailsPage() {
+  const { id } = useParams();
+  const [order, setOrder] = useState(null);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchOrder = async () => {
+      try {
+        const res = await fetchData(`${ADMIN_ORDER_URL}/${id}`);
+        if (res.order) {
+          setOrder(res.order);
+        }
+      } catch (error) {
+        console.error("Error fetching order:", error);
+      } finally {
+        // setLoading(false);
+      }
+    };
+
+    fetchOrder();
+  }, [id]);
+  const orderStatuses = ["unpaid", "delivering", "delivered", "canceled"];
+  const statusLabels: Record<(typeof orderStatuses)[number], string> = {
+    unpaid: "Chưa thanh toán",
+    delivering: "Đang giao hàng",
+    delivered: "Đã giao",
+    canceled: "Đã hủy",
+  };
+
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  const handleStatusChange = async (newStatus: string) => {
+    console.log("jjj");
+    if (newStatus === order.order_status || updatingStatus) return;
+    setUpdatingStatus(true);
+    try {
+      const res = await fetch(`${ADMIN_ORDER_URL}/${id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setOrder({ ...order, order_status: newStatus });
+      }
+    } catch (err) {
+      console.error("Failed to update status:", err);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  if (!order) return <div>Loading...</div>;
+
   return (
     <div className="w-full py-2 flex flex-col items gap-4">
       {/* Order Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center ml-8">
         <div className="flex gap-3">
-          <h1 className="text-2xl font-bold">Order #32543</h1>
+          <h1 className="text-2xl font-bold">
+            Order #{order.order_id.split(".")[0]}
+          </h1>
           <div className="flex items-center gap-2">
             <Badge
               variant="outline"
               className="bg-emerald-50 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-600">
               <span className="h-2 w-2 rounded-full bg-emerald-500 mr-1.5"></span>
-              Paid
-            </Badge>
-            <Badge
-              variant="outline"
-              className="bg-emerald-50 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-600">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 mr-1.5"></span>
-              Fulfilled
+              {statusLabels[order.order_status] || order.order_status}
             </Badge>
             <span className="text-muted-foreground text-sm ml-2">
-              <span className="inline-block mr-1">📅</span> Aug 17, 2020, 5:48
-              (ET)
+              <span className="inline-block mr-1">📅</span>{" "}
+              {formatDateTime(order.createdAt)}
             </span>
           </div>
         </div>
@@ -51,15 +117,68 @@ export default function OrderDetailsPage() {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-4 mb-5">
-        <Button variant="outline" className="flex items-center gap-2">
-          <Printer className="h-4 w-4" />
-          Print order
-        </Button>
-        <Button variant="outline" className="flex items-center gap-2">
-          More options
-          <ChevronDown className="h-4 w-4" />
-        </Button>
+      <div className="flex items-center gap-4 mb-5 justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            Print order
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                More options
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <Copy className="h-4 w-4 mr-2" />
+                Duplicate
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <X className="h-4 w-4 mr-2" />
+                Cancel order
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Archive className="h-4 w-4 mr-2" />
+                Archive
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Eye className="h-4 w-4 mr-2" />
+                View order status page
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit order
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="flex overflow-x-auto px-2 pb-3">
+          {orderStatuses.map((status, index) => {
+            const isActive = order.order_status === status;
+            const isFirst = index === 0;
+            const isLast = index === orderStatuses.length - 1;
+
+            return (
+              <Button
+                key={status}
+                onClick={() => handleStatusChange(status)}
+                variant={isActive ? "default" : "ghost"}
+                className={`
+          text-sm px-4 py-2 
+          transition-colors border 
+          ${isActive ? "bg-primary text-white" : "bg-muted text-muted-foreground hover:bg-accent"}
+          ${isFirst ? "rounded-l-full" : ""}
+          ${isLast ? "rounded-r-full" : ""}
+          ${!isFirst && !isLast ? "rounded-none" : ""}
+          -ml-px
+        `}>
+                {statusLabels[status] || status}
+              </Button>
+            );
+          })}
+        </div>
       </div>
 
       <Separator className="mb-5" />
@@ -72,7 +191,7 @@ export default function OrderDetailsPage() {
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold">Order details</h2>
               <Badge variant="secondary" className="rounded-md">
-                4
+                {order.order_products.length}
               </Badge>
             </div>
 
@@ -83,65 +202,80 @@ export default function OrderDetailsPage() {
           <Separator />
 
           <div className="divide-y">
-            {/* Product 1 */}
-            <div className="flex items-start gap-4 py-6">
-              {/* Image */}
-              <div className="w-16 h-16 overflow-hidden bg-slate-100 flex-shrink-0">
-                <Image
-                  src="/placeholder.svg?height=64&width=64"
-                  alt="Topman shoe in green"
-                  width={64}
-                  height={64}
-                  className="object-cover"
-                />
-              </div>
-              {/* Remaining */}
-              <div className="flex-1 grid grid-cols-2">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium">Topman shoe in green</h3>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    <div>Gender: Women</div>
-                    <div>Color: Green</div>
-                    <div>Size: UK 7</div>
+            {/* Products*/}
+            {order?.order_products?.map((product: any, index: number) => (
+              <div className="flex items-start gap-4 py-6" key={index}>
+                {/* Image */}
+                <div className="w-16 h-16 overflow-hidden bg-slate-100 flex-shrink-0">
+                  <Image
+                    src={product.variant_img}
+                    alt={product.product_name}
+                    width={64}
+                    height={64}
+                    className="object-cover"
+                  />
+                </div>
+                {/* Remaining */}
+                <div className="flex-1 grid grid-cols-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium">{product.product_name}</h3>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      <div>Gender: Women</div>
+                      <div>Color: Green</div>
+                      <div>Size: UK 7</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="text-left grow px-4">
+                      <div className="font-medium">
+                        {(
+                          product.unit_price *
+                          ((100 - product.discount_percent) / 100)
+                        ).toFixed(0)}
+                      </div>
+                    </div>
+                    <div className="text-center grow px-4">
+                      <div className="font-medium">{product.quantity}</div>
+                    </div>
+                    <div className="text-right grow">
+                      <div className="font-medium">
+                        {(
+                          product.unit_price *
+                          ((100 - product.discount_percent) / 100) *
+                          product.quantity
+                        ).toFixed(0)}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <div className="text-left grow px-4">
-                    <div className="font-medium">$21.00</div>
-                  </div>
-                  <div className="text-center grow px-4">
-                    <div className="font-medium">2</div>
-                  </div>
-                  <div className="text-right grow">
-                    <div className="font-medium">$42.00</div>
-                  </div>
-                </div>
               </div>
-            </div>
+            ))}
 
             {/* Order Summary */}
             <div className="p-4">
               <div className="ml-auto w-full max-w-xs space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal:</span>
-                  <span className="font-medium">$65.00</span>
+                  <span className="font-medium">
+                    {order.final_cost - order.shipping_cost}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Shipping fee:</span>
-                  <span className="font-medium">$0.00</span>
+                  <span className="font-medium">{order.shipping_cost}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tax:</span>
-                  <span className="font-medium">$7.00</span>
+                  <span className="font-medium">$0.00</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-medium">
                   <span>Total:</span>
-                  <span>$65.00</span>
+                  <span>{order.final_cost}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Amount paid:</span>
-                  <span className="font-medium">$65.00</span>
+                  <span className="font-medium">{order.final_cost}</span>
                 </div>
               </div>
             </div>
