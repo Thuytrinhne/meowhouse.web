@@ -205,3 +205,9 @@ export interface IRatingProduct {
   image: string;
   discountAmount: number;
 }
+export interface IPagination {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+}

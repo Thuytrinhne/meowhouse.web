@@ -13,6 +13,7 @@ import OrderProductItem from "@/components/(order)/order-product-item";
 
 // import utils
 import { extractOrderIdPrefix } from "@/utils/functions/format";
+import { formatDateTime } from "@/utils/functions/convert";
 
 interface OrderDetailsProps {
   order: Order;
@@ -136,9 +137,7 @@ export default function OrderDetails({
                       Ngày đặt:
                     </span>
                     <span className="font-medium text-base text-pri-1 dark:text-white">
-                      {order.createdAt
-                        ? new Date(order.createdAt).toLocaleDateString("vi-VN")
-                        : "N/A"}
+                      {formatDateTime(order.createdAt)}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 text-sm">
@@ -207,7 +206,7 @@ export default function OrderDetails({
             <div className="mt-4 pt-4 border-t dark:border-gray-700 flex flex-col gap-2 items-end">
               <div className="text-sm">
                 <span className="text-neutral-500 dark:text-gray-400 text-base">
-                  Tổng tiền hàng:{" "}
+                  Tổng tiền hàng:
                 </span>
                 <span className="font-medium text-base dark:text-white">
                   {order.final_cost != null

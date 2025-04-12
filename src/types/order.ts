@@ -31,6 +31,7 @@ export interface Order {
   shipping_cost: number;
   final_cost: number;
   order_status: "unpaid" | "delivering" | "delivered" | "canceled";
+  payment_method: string;
   createdAt: string | null;
   order_id_hashed: string;
 }

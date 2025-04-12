@@ -16,64 +16,8 @@ import StatusBadge from "@/components/(order)/status-badge";
 import OrderActions from "@/components/(order)/order-actions";
 import { putData } from "@/utils/functions/client";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
-
-interface OrderProduct {
-  product_id: string;
-  variant_id: string;
-  quantity: number;
-  unit_price: number;
-  discount_percent: number;
-  product_name: string;
-  product_img: string;
-  variant_name: string;
-  variant_img: string;
-}
-
-interface OrderBuyer {
-  name: string;
-  phone_number: string;
-  address: {
-    province: string;
-    district: string;
-    ward: string;
-    street: string;
-  };
-}
-
-interface Order {
-  _id: string;
-  user_id: string;
-  order_id: string;
-  order_products: OrderProduct[];
-  order_buyer: OrderBuyer;
-  order_note: string;
-  shipping_cost: number;
-  final_cost: number;
-  order_status: "unpaid" | "delivering" | "delivered" | "canceled";
-  createdAt: string | null;
-  order_id_hashed: string;
-}
-
-interface OrdersResponse {
-  status: number;
-  success: boolean;
-  data: {
-    orders: Order[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      total_pages: number;
-    };
-  };
-}
-
-interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  total_pages: number;
-}
+import { OrderProduct, Order } from "@/types/order";
+import { IPagination } from "@/types/interfaces";
 
 // Thêm hàm tính giá sau khi giảm giá
 const calculateDiscountedPrice = (price: number, discountPercent: number) => {
@@ -104,7 +48,7 @@ export default function HistoryOrder() {
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({
+  const [pagination, setPagination] = useState<IPagination>({
     page: 1,
     limit: 10,
     total: 0,

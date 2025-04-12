@@ -27,6 +27,8 @@ export const PUBLIC_ADMIN_CATEGORIES_URL = `${process.env.NEXT_PUBLIC_BACKEND_UR
 export const ADMIN_BLOGS_URL = `${process.env.BACKEND_URL}/admin/articles`;
 export const PUBLIC_ADMIN_BLOGS_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/articles`;
 
+export const ADMIN_ORDER_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/orders`;
+
 export const ADMIN_PRODUCTS = "/admin/products";
 export const ADMIN_BLOGS = "/admin/blogs";
 export const ADMIN_CATEGORIES = "/admin/categories";

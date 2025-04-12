@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -28,148 +28,34 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/(admin)/orders/data-table";
 import { Pagination } from "@/components/(admin)/orders/pagination";
 import { DateRangePicker } from "@/components/(admin)/orders/date-range-picker";
-
-// Define the order type
-type Order = {
-  id: string;
-  productName: string;
-  additionalProducts?: number;
-  customerName: string;
-  date: string;
-  payment: string;
-  amount: string;
-  status: "Completed" | "In Progress" | "Waiting" | "Cancelled";
-};
-
-// Sample data
-const orders: Order[] = [
-  {
-    id: "#302012",
-    productName: "Wall Clock Special Edition",
-    additionalProducts: 3,
-    customerName: "Cameron Williamson",
-    date: "22 Jan 2022",
-    payment: "Mastercard",
-    amount: "$121.00",
-    status: "Completed",
-  },
-  {
-    id: "#302011",
-    productName: "Airpods Max 2024 Edition",
-    customerName: "Brooklyn Simmons",
-    date: "20 Jan 2022",
-    payment: "Visa",
-    amount: "$590.00",
-    status: "In Progress",
-  },
-  {
-    id: "#302002",
-    productName: "Nike Shoes",
-    additionalProducts: 1,
-    customerName: "Darlene Robertson",
-    date: "24 Jan 2022",
-    payment: "Paypal",
-    amount: "$348.00",
-    status: "Waiting",
-  },
-  {
-    id: "#301900",
-    productName: "Wooden Stylish Chair",
-    customerName: "Courtney Henry",
-    date: "26 Jan 2022",
-    payment: "Mastercard",
-    amount: "$607.00",
-    status: "Completed",
-  },
-  {
-    id: "#301900",
-    productName: "PS 5 Pro Special Edition Gaming Controller",
-    additionalProducts: 1,
-    customerName: "Kathryn Murphy",
-    date: "26 Jan 2022",
-    payment: "Paypal",
-    amount: "$607.00",
-    status: "Waiting",
-  },
-  {
-    id: "#301900",
-    productName: "Xiaomi 360° CC Camera",
-    additionalProducts: 7,
-    customerName: "Ronald Richards",
-    date: "26 Jan 2022",
-    payment: "Mastercard",
-    amount: "$607.00",
-    status: "In Progress",
-  },
-  {
-    id: "#301900",
-    productName: "Winter Jacket",
-    customerName: "Savannah Nguyen",
-    date: "26 Jan 2022",
-    payment: "Visa",
-    amount: "$607.00",
-    status: "Cancelled",
-  },
-  // Add more orders to demonstrate pagination
-  {
-    id: "#301899",
-    productName: "Mechanical Keyboard",
-    customerName: "Leslie Alexander",
-    date: "25 Jan 2022",
-    payment: "Mastercard",
-    amount: "$159.00",
-    status: "Completed",
-  },
-  {
-    id: "#301898",
-    productName: "Smart Watch Series 7",
-    customerName: "Jacob Jones",
-    date: "25 Jan 2022",
-    payment: "Visa",
-    amount: "$399.00",
-    status: "In Progress",
-  },
-  {
-    id: "#301897",
-    productName: "Wireless Earbuds",
-    customerName: "Theresa Webb",
-    date: "24 Jan 2022",
-    payment: "Paypal",
-    amount: "$89.00",
-    status: "Waiting",
-  },
-  {
-    id: "#301896",
-    productName: "Laptop Stand",
-    customerName: "Marvin McKinney",
-    date: "24 Jan 2022",
-    payment: "Mastercard",
-    amount: "$45.00",
-    status: "Completed",
-  },
-  {
-    id: "#301895",
-    productName: "External SSD 1TB",
-    customerName: "Kristin Watson",
-    date: "23 Jan 2022",
-    payment: "Paypal",
-    amount: "$129.00",
-    status: "Completed",
-  },
-];
-
-// Helper function to parse date strings like "22 Jan 2022" to Date objects
-const parseOrderDate = (dateString: string): Date => {
-  return new Date(dateString.replace(/(\d+)\s+(\w+)\s+(\d+)/, "$2 $1, $3"));
-};
+import { fetchData } from "@/utils/functions/server";
+import { ADMIN_ORDER_URL } from "@/utils/constants/urls";
 
 export function Orders() {
+  const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [dateFilter, setDateFilter] = useState("all");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState("all");
   const itemsPerPage = 7;
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await fetchData(`${ADMIN_ORDER_URL}?page=${currentPage}`);
+        setOrders(res.orders);
+        setCurrentPage(res.pagination.page);
+        setTotalPages(res.pagination.total_pages);
+      } catch (err) {
+        console.error("Failed to fetch orders", err);
+      }
+    };
+
+    fetchOrders();
+  }, [currentPage]);
 
   // Reset date range when date filter changes
   const handleDateFilterChange = (value: string) => {
@@ -199,91 +85,91 @@ export function Orders() {
   };
 
   // Filter orders based on search term, date and status
-  const filteredOrders = orders.filter((order) => {
-    // Text search filter
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase());
+  // const filteredOrders = orders.filter((order) => {
+  //   // Text search filter
+  //   const matchesSearch =
+  //     order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     order.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     order.customerName.toLowerCase().includes(searchTerm.toLowerCase());
 
-    if (!matchesSearch) return false;
+  //   if (!matchesSearch) return false;
 
-    // Date filter
-    const orderDate = parseOrderDate(order.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  //   // Date filter
+  //   const orderDate = parseOrderDate(order.date);
+  //   const today = new Date();
+  //   today.setHours(0, 0, 0, 0);
 
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+  //   const yesterday = new Date(today);
+  //   yesterday.setDate(yesterday.getDate() - 1);
 
-    const lastWeekStart = new Date(today);
-    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+  //   const lastWeekStart = new Date(today);
+  //   lastWeekStart.setDate(lastWeekStart.getDate() - 7);
 
-    const lastMonthStart = new Date(today);
-    lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
+  //   const lastMonthStart = new Date(today);
+  //   lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
 
-    let matchesDate = true;
+  //   let matchesDate = true;
 
-    if (dateFilter === "custom" && dateRange?.from) {
-      // Custom date range filter
-      if (dateRange.to) {
-        // Range with both from and to dates
-        matchesDate = isWithinInterval(orderDate, {
-          start: startOfDay(dateRange.from),
-          end: endOfDay(dateRange.to),
-        });
-      } else {
-        // Only from date is selected
-        matchesDate =
-          orderDate.getDate() === dateRange.from.getDate() &&
-          orderDate.getMonth() === dateRange.from.getMonth() &&
-          orderDate.getFullYear() === dateRange.from.getFullYear();
-      }
-    } else {
-      // Predefined date filters
-      switch (dateFilter) {
-        case "today":
-          matchesDate =
-            orderDate.getDate() === today.getDate() &&
-            orderDate.getMonth() === today.getMonth() &&
-            orderDate.getFullYear() === today.getFullYear();
-          break;
-        case "yesterday":
-          matchesDate =
-            orderDate.getDate() === yesterday.getDate() &&
-            orderDate.getMonth() === yesterday.getMonth() &&
-            orderDate.getFullYear() === yesterday.getFullYear();
-          break;
-        case "last7days":
-          matchesDate = orderDate >= lastWeekStart;
-          break;
-        case "last30days":
-          matchesDate = orderDate >= lastMonthStart;
-          break;
-        case "all":
-        default:
-          matchesDate = true;
-          break;
-      }
-    }
+  //   if (dateFilter === "custom" && dateRange?.from) {
+  //     // Custom date range filter
+  //     if (dateRange.to) {
+  //       // Range with both from and to dates
+  //       matchesDate = isWithinInterval(orderDate, {
+  //         start: startOfDay(dateRange.from),
+  //         end: endOfDay(dateRange.to),
+  //       });
+  //     } else {
+  //       // Only from date is selected
+  //       matchesDate =
+  //         orderDate.getDate() === dateRange.from.getDate() &&
+  //         orderDate.getMonth() === dateRange.from.getMonth() &&
+  //         orderDate.getFullYear() === dateRange.from.getFullYear();
+  //     }
+  //   } else {
+  //     // Predefined date filters
+  //     switch (dateFilter) {
+  //       case "today":
+  //         matchesDate =
+  //           orderDate.getDate() === today.getDate() &&
+  //           orderDate.getMonth() === today.getMonth() &&
+  //           orderDate.getFullYear() === today.getFullYear();
+  //         break;
+  //       case "yesterday":
+  //         matchesDate =
+  //           orderDate.getDate() === yesterday.getDate() &&
+  //           orderDate.getMonth() === yesterday.getMonth() &&
+  //           orderDate.getFullYear() === yesterday.getFullYear();
+  //         break;
+  //       case "last7days":
+  //         matchesDate = orderDate >= lastWeekStart;
+  //         break;
+  //       case "last30days":
+  //         matchesDate = orderDate >= lastMonthStart;
+  //         break;
+  //       case "all":
+  //       default:
+  //         matchesDate = true;
+  //         break;
+  //     }
+  //   }
 
-    if (!matchesDate) return false;
+  //   if (!matchesDate) return false;
 
-    // Status filter
-    if (statusFilter !== "all" && order.status !== statusFilter) {
-      return false;
-    }
+  //   // Status filter
+  //   if (statusFilter !== "all" && order.status !== statusFilter) {
+  //     return false;
+  //   }
 
-    return true;
-  });
+  //   return true;
+  // });
 
   // Calculate pagination
-  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedOrders = filteredOrders.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+  // const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  // const startIndex = (currentPage - 1) * itemsPerPage;
+  // const paginatedOrders = filteredOrders.slice(
+  //   startIndex,
+  //   startIndex + itemsPerPage
+  // );
 
   // Check if any filters are active
   const hasActiveFilters =
@@ -293,7 +179,7 @@ export function Orders() {
     <div className="space-y-6">
       <div>
         <div className="flex justify-between">
-          <h1 className="text-2xl font-bold">Orders</h1>
+          <h1 className="text-2xl font-bold ml-8">Quản lý đơn hàng</h1>
           {/* Export and time range */}
           <div className="flex items-center gap-2">
             <Button variant="outline" size="icon">
@@ -500,8 +386,7 @@ export function Orders() {
             )}
           </div>
         </div>
-
-        <DataTable orders={paginatedOrders} />
+        <DataTable orders={orders} />
 
         <div className="p-4 border-t">
           <Pagination

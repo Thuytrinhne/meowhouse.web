@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useParams } from "next/navigation";
 import OrderDetails from "@/components/(order)/order-details";
-import { extractOrderIdPrefix } from "@/utils/functions/format";
 import { putData } from "@/utils/functions/client";
 
 interface OrderProduct {

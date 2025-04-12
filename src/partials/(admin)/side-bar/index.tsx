@@ -56,6 +56,17 @@ const sidebarData = [
     items: [{ title: "Bảng điều khiển", icon: LayoutDashboard, url: "/admin" }],
   },
   {
+    title: "Đơn hàng",
+    icon: ShoppingCart,
+    items: [
+      {
+        icon: LayoutList,
+        title: "Danh sách đơn hàng",
+        url: "/admin/orders",
+      },
+    ],
+  },
+  {
     title: "Sản phẩm",
     icon: ShoppingCart,
     items: [

@@ -7,23 +7,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-
-type Order = {
-  id: string;
-  productName: string;
-  additionalProducts?: number;
-  customerName: string;
-  date: string;
-  payment: string;
-  amount: string;
-  status: "Completed" | "In Progress" | "Waiting" | "Cancelled";
-};
+import { Order } from "@/types/order";
+import { convertNumberToVND, formatDateTime } from "@/utils/functions/convert";
+import { useRouter } from "next/navigation";
 
 interface DataTableProps {
   orders: Order[];
 }
 
 export function DataTable({ orders }: DataTableProps) {
+  const router = useRouter();
+
+  const handleOnclickOrder = (id: string) => {
+    router.push(`/admin/orders/${id}`);
+  };
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -44,27 +41,32 @@ export function DataTable({ orders }: DataTableProps) {
         </thead>
         <tbody>
           {orders.map((order, index) => (
-            <tr key={index} className="border-b hover:bg-muted/50">
+            <tr
+              key={index}
+              className="border-b hover:bg-muted/50 cursor-pointer"
+              onClick={() => handleOnclickOrder(order._id)}>
               <td className="p-4">
                 <Checkbox />
               </td>
-              <td className="p-4 font-medium">{order.id}</td>
+              <td className="p-4 font-medium">{order.order_id}</td>
               <td className="p-4">
                 <div>
-                  {order.productName}
-                  {order.additionalProducts && (
+                  {order.order_products[0].product_name}
+                  {order.order_products[1] && (
                     <div className="text-sm text-muted-foreground">
-                      +{order.additionalProducts} other products
+                      +{order.order_products.length - 1} other products
                     </div>
                   )}
                 </div>
               </td>
-              <td className="p-4">{order.customerName}</td>
-              <td className="p-4">{order.date}</td>
-              <td className="p-4">{order.payment}</td>
-              <td className="p-4">{order.amount}</td>
               <td className="p-4">
-                <StatusBadge status={order.status} />
+                {order.order_buyer.name} - {order.order_buyer.phone_number}
+              </td>
+              <td className="p-4">{formatDateTime(order.createdAt)}</td>
+              <td className="p-4">{order.payment_method}</td>
+              <td className="p-4">{convertNumberToVND(order.final_cost)}</td>
+              <td className="p-4">
+                <StatusBadge status={order.order_status} />
               </td>
               <td className="p-4">
                 <DropdownMenu>
@@ -89,29 +91,29 @@ export function DataTable({ orders }: DataTableProps) {
   );
 }
 
-function StatusBadge({ status }: { status: Order["status"] }) {
+function StatusBadge({ status }: { status: Order["order_status"] }) {
   let variant: "outline" | "secondary" | "destructive" | "default";
 
   switch (status) {
-    case "Completed":
+    case "delivered":
       return (
         <Badge className="bg-green-100 text-green-800 hover:bg-green-100 hover:text-green-800">
           Completed
         </Badge>
       );
-    case "In Progress":
+    case "delivering":
       return (
         <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 hover:text-blue-800">
           In Progress
         </Badge>
       );
-    case "Waiting":
+    case "unpaid":
       return (
         <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 hover:text-amber-800">
           Waiting
         </Badge>
       );
-    case "Cancelled":
+    case "canceled":
       return (
         <Badge className="bg-red-100 text-red-800 hover:bg-red-100 hover:text-red-800">
           Cancelled
