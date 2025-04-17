@@ -120,6 +120,7 @@ export default function ProfilePage() {
     user_gender: undefined,
     user_birth_day: "",
     user_avt: "",
+    createdAt: "",
   });
   // Thêm hàm helper để chuẩn hóa giá trị giới tính
   const normalizeGenderValue = (
@@ -154,6 +155,7 @@ export default function ProfilePage() {
             user_gender: normalizeGenderValue(profile.user_gender),
             user_birth_day: profile.user_birth_day || "",
             user_avt: profile.user_avt || "",
+            createdAt: "",
           });
 
           // Set the avatar image if it exists
