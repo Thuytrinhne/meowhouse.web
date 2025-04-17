@@ -59,6 +59,7 @@ export function formatDateTime(dateString: string | Date | undefined): string {
   const formattedTime = date.toLocaleTimeString("vi-VN", {
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
     hour12: false,
   });
 

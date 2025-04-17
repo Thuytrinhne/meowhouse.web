@@ -19,6 +19,7 @@ export const COLUMN_NAMES = {
   "column-stock-quantity": "Số lượng tồn",
   "column-start-time": "Bắt đầu",
   "column-end-time": "Kết thúc",
+  "column-date-created": "Ngày tạo",
 };
 
 export const SORT_NAMES = {
@@ -108,6 +109,9 @@ export const PAGE_DATA = {
     "Thống kê doanh thu theo danh mục sản phẩm",
   "dashboard-product-by-category-chart-description":
     "Biểu đồ dưới đây thể hiện số doanh thu ttheo từng danh mục của sản phẩm.",
+  user: "Quản lý người dùng",
+  "user-add": "Thêm người dùng",
+  "user-detail": "Chi tiết người dùng",
 };
 
 export const METHOD_NAMES = {

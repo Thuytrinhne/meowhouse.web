@@ -7,6 +7,7 @@ import { toast, Toaster } from "sonner";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import { ADMIN_NOTIFICATIONS } from "@/utils/constants/urls";
 
 // Function phát âm thanh thông báo
 const playNotificationSound = () => {
@@ -22,6 +23,19 @@ export default function AdminLayout({
   const { orderNotification } = useOrderNotifications();
   const router = useRouter();
   const [duration, setDuration] = useState(20000); // Mặc định 20 giây
+  const markNotificationAsRead = async (id: string) => {
+    try {
+      await fetch(`${ADMIN_NOTIFICATIONS}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ read: true }),
+      });
+    } catch (err) {
+      console.error("Lỗi khi đánh dấu đã đọc:", err);
+    }
+  };
 
   useEffect(() => {
     if (orderNotification) {
@@ -37,8 +51,9 @@ export default function AdminLayout({
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
             className="relative bg-blue-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-4 cursor-pointer w-[400px] max-w-md"
-            onClick={() => {
+            onClick={async () => {
               toast.dismiss(t);
+              await markNotificationAsRead(orderNotification._id);
               router.push(orderNotification.actionUrl);
             }}
             onMouseEnter={() => setDuration(Infinity)} // Khi hover, không đóng

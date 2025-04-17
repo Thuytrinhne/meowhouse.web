@@ -146,6 +146,22 @@ const sidebarData = [
       },
     ],
   },
+  {
+    title: "Người dùng",
+    icon: ShoppingCart,
+    items: [
+      {
+        icon: LayoutList,
+        title: "Danh sách người dùng",
+        url: "/admin/users",
+      },
+      {
+        icon: Plus,
+        title: "Thêm người dùng",
+        url: "/admin/users/add",
+      },
+    ],
+  },
 ];
 
 export default function AdminSidebar() {

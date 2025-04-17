@@ -46,22 +46,13 @@ import type { CSSProperties } from "react";
 import { PasswordInput } from "@/components/(general)/inputs/input-password/page";
 import { fetchWithAuth } from "@/utils/functions/server";
 import { AUTH_URL } from "@/utils/constants/urls";
-
+import { UserData } from "@/types/user";
 // Thêm style cho loading
 const override: CSSProperties = {
   display: "block",
   margin: "0 auto",
   borderColor: "red",
 };
-
-// Update the userData state interface to match API response
-interface UserData {
-  user_name: string;
-  user_phone_number: string;
-  user_gender: "Nam" | "Nữ" | "Khác" | undefined | "";
-  user_birth_day: string;
-  user_avt?: string;
-}
 
 type Gender = "Nam" | "Nữ" | "Khác";
 
@@ -123,6 +114,7 @@ export default function ProfilePage() {
   const [date, setDate] = useState<Date | undefined>();
   const [dateInput, setDateInput] = useState("");
   const [userData, setUserData] = useState<UserData>({
+    _id: "",
     user_name: "",
     user_phone_number: "",
     user_gender: undefined,
@@ -156,6 +148,7 @@ export default function ProfilePage() {
 
           // Cập nhật userData
           setUserData({
+            _id: profile._id || "",
             user_name: profile.user_name || "",
             user_phone_number: profile.user_phone_number || "",
             user_gender: normalizeGenderValue(profile.user_gender),

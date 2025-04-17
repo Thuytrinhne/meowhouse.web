@@ -142,17 +142,52 @@ export default function NotificationsPage() {
   const handleMarkAllAsRead = () => {
     setNotifications(notifications.map((n) => ({ ...n, read: true })));
   };
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      // Gửi request PUT đến API
+      const res = await fetch(`${ADMIN_NOTIFICATIONS}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ read: true }), // cập nhật field 'read'
+      });
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n._id === id ? { ...n, read: true } : n))
-    );
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Cập nhật thất bại");
+
+      // Cập nhật UI nếu thành công
+      setNotifications(
+        notifications.map((n) => (n._id === id ? { ...n, read: true } : n))
+      );
+    } catch (err) {
+      console.error("Lỗi cập nhật thông báo:", err);
+    }
   };
 
-  const handleMarkAsUnread = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n._id === id ? { ...n, read: false } : n))
-    );
+  const handleMarkAsUnread = async (id: string) => {
+    try {
+      // Gửi request PUT đến API
+      const res = await fetch(`${ADMIN_NOTIFICATIONS}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ read: false }), // cập nhật field 'read'
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Cập nhật thất bại");
+
+      // Cập nhật UI nếu thành công
+      setNotifications(
+        notifications.map((n) => (n._id === id ? { ...n, read: false } : n))
+      );
+    } catch (err) {
+      console.error("Lỗi cập nhật thông báo:", err);
+    }
   };
 
   const handleRefresh = () => {
