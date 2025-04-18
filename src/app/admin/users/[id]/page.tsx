@@ -5,6 +5,7 @@ import UserOrders from "@/components/(admin)/users/user-orders";
 import UserCartItems from "@/components/(admin)/users/user-cart-items";
 import UserSavedCoupons from "@/components/(admin)/users/user-saved-coupons";
 import UserAddresses from "@/components/(admin)/users/user-addresses";
+import { ADMIN_USERS_URL } from "@/utils/constants/urls";
 
 export const metadata: Metadata = {
   title: "User Details",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 async function getUserData(userId: string) {
   try {
-    const res = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
+    const res = await fetch(`${ADMIN_USERS_URL}/${userId}`, {
       cache: "no-store",
     });
 
