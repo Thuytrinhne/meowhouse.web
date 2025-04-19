@@ -178,7 +178,7 @@ export interface ICoupon {
   coupon_stock_quantity: number;
   start_time: string;
   end_time: string;
-  coupon_id_hashed: string;
+  coupon_hashed_id: string;
   isOwned?: boolean;
 }
 

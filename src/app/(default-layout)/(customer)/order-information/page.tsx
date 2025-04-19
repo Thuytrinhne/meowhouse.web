@@ -5,10 +5,27 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
-import { ChevronRight, Ticket, MapPin, CreditCard, Wallet } from "lucide-react";
+import {
+  ChevronRight,
+  Ticket,
+  MapPin,
+  CreditCard,
+  Wallet,
+  X,
+  Check,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { useSearchParams, useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/libs/utils";
 
 // import components
 import { Input } from "@/components/ui/input";
@@ -33,26 +50,10 @@ import { IOrderProduct } from "@/types/interfaces";
 import { Address } from "@/types/address";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-const demoCoupons = [
-  {
-    id: 1,
-    title: "Khuyến mãi ngày 11/1",
-    description: "Siêu ưu đãi, mua ngay giá cực hời.",
-    discount: "20%",
-    maxDiscount: "200.000đ",
-    type: "Giảm giá đơn hàng",
-    image: "/imgs/test.jpg",
-  },
-  {
-    id: 2,
-    title: "Miễn phí vận chuyển",
-    description: "Miễn trừ tất cả các chi phí khi vận chuyển hàng.",
-    discount: "20K",
-    maxDiscount: "20.000đ",
-    type: "Miễn phí vận chuyển",
-    image: "/imgs/test.jpg",
-  },
-];
+import { ICoupon } from "@/types/interfaces";
+import { PUBLIC_CUSTOMER_COUPON_URL } from "@/utils/constants/urls";
+// Định nghĩa kiểu dữ liệu cho mã giảm giá
+type CouponType = "Free Ship" | "Order";
 
 export default function OrderInformationPage() {
   const searchParams = useSearchParams();
@@ -74,11 +75,48 @@ export default function OrderInformationPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [defaultAddress, setDefaultAddresses] = useState<Address>();
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [coupons, setCoupon] = useState<ICoupon[]>([]);
 
   const shippingFee = SHIPPING_COST; // Fixed shipping fee
-  const couponDiscount = 0; // Example coupon discount
-  const freeShippingDiscount = 0; // Example free shipping discount
+  const [selectedCoupons, setSelectedCoupons] = useState<
+    Record<CouponType, ICoupon | null>
+  >({
+    "Free Ship": null,
+    Order: null,
+  });
+
   const router = useRouter();
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        const res = await fetch(
+          `${PUBLIC_CUSTOMER_COUPON_URL}/${session.user.id}?limit=default`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            // Nếu cần thêm token:
+            // headers: {
+            //   Authorization: `Bearer ${token}`,
+            // },
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch coupons");
+
+        const data = await res.json();
+        setCoupon(data.data);
+        console.log("Danh sách coupons:", data.data);
+        return data;
+      } catch (error) {
+        console.error("Lỗi khi lấy coupons:", error);
+        return null;
+      }
+    };
+
+    fetchCoupons();
+  }, [session]);
 
   useEffect(() => {
     const fetchProductInfo = async () => {
@@ -167,6 +205,71 @@ export default function OrderInformationPage() {
     }
   }, [defaultAddress]);
 
+  // Hàm chọn mã giảm giá
+  const selectCoupon = (coupon: ICoupon) => {
+    setSelectedCoupons((prev) => ({
+      ...prev,
+      [coupon.coupon_type]:
+        prev[coupon.coupon_type]?.coupon_hashed_id === coupon.coupon_hashed_id
+          ? null
+          : coupon,
+    }));
+  };
+
+  // Hàm xóa mã giảm giá
+  const removeCoupon = (type: CouponType) => {
+    setSelectedCoupons((prev) => ({
+      ...prev,
+      [type]: null,
+    }));
+  };
+  // hàm check điều kiện mã giảm giá
+  const checkCouponCondition = (coupon: ICoupon) => {
+    const totalAmountBeforeDiscount =
+      calculateOriginalPrice() - calculateDiscount();
+    const SHIPPING_COST = shippingFee; // Giả sử phí ship cố định
+
+    // Kiểm tra điều kiện của coupon
+    if (coupon.coupon_type === "Free Ship") {
+      return SHIPPING_COST >= coupon.coupon_condition; // Kiểm tra phí ship có đủ để áp dụng miễn phí ship
+    }
+
+    // Kiểm tra điều kiện cho coupon giảm giá
+    return totalAmountBeforeDiscount >= coupon.coupon_condition; // Kiểm tra đơn hàng có đủ điều kiện cho coupon giảm giá
+  };
+
+  const calculateCouponDiscount = (
+    coupon: ICoupon | null,
+    baseAmount: number
+  ): number => {
+    if (!coupon) return 0;
+
+    if (coupon.coupon_unit === "%") {
+      const rawDiscount = (coupon.coupon_value / 100) * baseAmount;
+      return coupon.coupon_max_value
+        ? Math.min(rawDiscount, coupon.coupon_max_value)
+        : rawDiscount;
+    }
+
+    return coupon.coupon_value;
+  };
+  const getShippingDiscount = () => {
+    const discount = calculateCouponDiscount(
+      selectedCoupons["Free Ship"],
+      SHIPPING_COST
+    );
+    return Math.min(discount, SHIPPING_COST); // Không được vượt quá phí ship
+  };
+
+  const getOrderDiscount = () => {
+    const baseAmount = calculateOriginalPrice() - calculateDiscount(); // Tổng tiền hàng
+    const discount = calculateCouponDiscount(
+      selectedCoupons["Order"],
+      baseAmount
+    );
+    return Math.min(discount, baseAmount); // Không vượt quá tổng giá trị đơn
+  };
+
   const handleCityChange = (value: string) => {
     const selected = cities.find((city) => city.Id === value);
     console.log("selected", selected);
@@ -244,13 +347,11 @@ export default function OrderInformationPage() {
 
     const originalPrice = calculateOriginalPrice();
     const discount = calculateDiscount();
+    const couponDiscount = getOrderDiscount();
+    const freeShipping = getShippingDiscount();
 
     return (
-      originalPrice -
-      discount +
-      shippingFee -
-      couponDiscount -
-      freeShippingDiscount
+      originalPrice - discount + shippingFee - couponDiscount - freeShipping
     );
   };
 
@@ -300,6 +401,9 @@ export default function OrderInformationPage() {
         cancel_url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/order-history?selectedTab=unpaid`, // Cancel URL
         return_url: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/order-success?orderId=${encodeURIComponent(orderId)}`, // Success redirect
         from_cart: fromCart,
+        applied_coupons: Object.values(selectedCoupons)
+          .filter(Boolean)
+          .map((coupon) => coupon.coupon_hashed_id),
       };
       // console.log("dataaaaaaaaa neeeeee", newPaymentData);
       if (paymentMethod === "cod") {
@@ -524,58 +628,238 @@ export default function OrderInformationPage() {
         </div>
 
         {/* Mã giảm giá */}
-        <div className="mt-6">
+        <div className="mt-6 w-full mx-auto">
           <h3 className="font-bold mb-2 text-center">Phiếu giảm giá</h3>
           <hr className="mb-4 dark:border-white" />
-          {["Giảm giá đơn hàng", "Miễn phí vận chuyển"].map((type) => (
+
+          {/* Hiển thị các loại mã giảm giá */}
+          {(["Order", "Free Ship"] as CouponType[]).map((type) => (
             <div key={type} className="mb-4">
               <h3 className="text-lg font-semibold mb-2">{type}</h3>
-              <div className="flex items-center border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-lg px-3 py-2 mb-3 gap-2">
-                <Ticket className="text-gray-600 dark:text-white" />
-                <span className="text-sm text-gray-600 dark:text-white">
-                  Chọn mã giảm giá
-                </span>
-                <ChevronRight className="ml-auto text-gray-500 text-sm dark:text-white" />
-              </div>
-              {demoCoupons
-                .filter((coupon) => coupon.type === type)
-                .map((coupon) => (
-                  <div
-                    key={coupon.id}
-                    className="flex items-stretch border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-lg overflow-hidden">
-                    {/* Image Section */}
-                    <div className="w-24 flex-shrink-0">
-                      <img
-                        src={coupon.image}
-                        alt="coupon"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    {/* Content Section */}
-                    <div className="flex flex-col flex-grow p-4">
+
+              {/* Hiển thị mã giảm giá đã chọn hoặc nút chọn mã */}
+              {selectedCoupons[type] ? (
+                <div className="flex items-stretch border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-lg overflow-hidden">
+                  {/* Phần hình ảnh */}
+                  <div className="w-24 flex-shrink-0">
+                    <img
+                      // src={selectedCoupons[type]?.image || "/placeholder.svg"}
+                      src="/placeholder.svg"
+                      alt="coupon"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  {/* Phần nội dung */}
+                  <div className="flex flex-col flex-grow p-4">
+                    <div className="flex justify-between">
                       <h4 className="font-bold text-base text-gray-800 dark:text-white">
-                        {coupon.title}
+                        {selectedCoupons[type]?.coupon_name}
                       </h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {coupon.description}
-                      </p>
-                      <p className="text-sm text-gray-400 dark:text-gray-300">
-                        Tối đa: {coupon.maxDiscount}
-                      </p>
+                      <button
+                        onClick={() => removeCoupon(type)}
+                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white">
+                        <X size={18} />
+                      </button>
                     </div>
-                    {/* Discount Section */}
-                    <div className="bg-orange-500 text-white px-4 flex items-center justify-center text-lg font-bold">
-                      {coupon.discount}
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Giảm tối đa: {selectedCoupons[type]?.coupon_max_value}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Đơn tối thiểu: {selectedCoupons[type]?.coupon_condition}
+                    </p>
+                    <p className="text-sm text-gray-400 dark:text-gray-300">
+                      HSD: {selectedCoupons[type]?.end_time}
+                    </p>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="text-xs text-green-600 dark:text-green-400">
+                        Đã áp dụng
+                      </p>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button className="text-xs text-blue-600 dark:text-blue-400 underline">
+                            Chỉnh sửa
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>Chọn mã giảm giá {type}</DialogTitle>
+                          </DialogHeader>
+                          <ScrollArea className="max-h-[60vh]">
+                            <div className="space-y-3 p-1">
+                              {coupons
+                                .filter((coupon) => coupon.coupon_type === type)
+                                .map((coupon) => {
+                                  const isValidCoupon =
+                                    checkCouponCondition(coupon); // Kiểm tra điều kiện
+                                  return (
+                                    <div
+                                      key={coupon.coupon_hashed_id}
+                                      className={cn(
+                                        "flex items-stretch border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-lg overflow-hidden cursor-pointer",
+                                        selectedCoupons[type]
+                                          ?.coupon_hashed_id ===
+                                          coupon.coupon_hashed_id &&
+                                          "border-orange-500 dark:border-orange-500 border-2",
+                                        !isValidCoupon &&
+                                          "opacity-50 cursor-not-allowed"
+                                      )}
+                                      onClick={() =>
+                                        isValidCoupon && selectCoupon(coupon)
+                                      }>
+                                      {/* Phần hình ảnh */}
+                                      <div className="w-24 flex-shrink-0 relative">
+                                        <img
+                                          // src={coupon.image || "/placeholder.svg"}
+                                          alt="coupon"
+                                          className="w-full h-full object-cover"
+                                        />
+                                        {selectedCoupons[type]
+                                          ?.coupon_hashed_id ===
+                                          coupon.coupon_hashed_id && (
+                                          <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5">
+                                            <Check
+                                              size={14}
+                                              className="text-white"
+                                            />
+                                          </div>
+                                        )}
+                                      </div>
+                                      {/* Phần nội dung */}
+                                      <div className="flex flex-col flex-grow p-3">
+                                        <h4 className="font-bold text-base text-gray-800 dark:text-white">
+                                          {coupon.coupon_name}
+                                        </h4>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                          Giảm tối đa: {coupon.coupon_max_value}
+                                        </p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                          Đơn tối thiểu:{" "}
+                                          {coupon.coupon_condition}
+                                        </p>
+                                        <p className="text-xs text-gray-400 dark:text-gray-300 mt-1">
+                                          HSD: {coupon.end_time}
+                                        </p>
+                                      </div>
+                                      {/* Phần giảm giá */}
+                                      <div
+                                        className={`${
+                                          type === "Free Ship"
+                                            ? "bg-pri-7"
+                                            : "bg-orange-500"
+                                        } text-white px-4 flex items-center justify-center text-lg font-bold`}>
+                                        {coupon.coupon_value}
+                                        {coupon.coupon_unit}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                            </div>
+                          </ScrollArea>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
-                ))}
+
+                  {/* Phần giảm giá */}
+                  <div
+                    className={`${
+                      type === "Free Ship" ? "bg-pri-7" : "bg-orange-500"
+                    } text-white px-4 flex items-center justify-center text-lg font-bold`}>
+                    {selectedCoupons[type]?.coupon_value}
+                    {selectedCoupons[type]?.coupon_unit}
+                  </div>
+                </div>
+              ) : (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div className="flex items-center border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-lg px-3 py-2 mb-3 gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800">
+                      <Ticket className="text-gray-600 dark:text-white" />
+                      <span className="text-sm text-gray-600 dark:text-white">
+                        Chọn mã giảm giá
+                      </span>
+                      <ChevronRight className="ml-auto text-gray-500 text-sm dark:text-white" />
+                    </div>
+                  </DialogTrigger>
+
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Chọn mã giảm giá {type}</DialogTitle>
+                    </DialogHeader>
+
+                    <ScrollArea className="max-h-[60vh]">
+                      <div className="space-y-3 p-1">
+                        {coupons
+                          .filter((coupon) => coupon.coupon_type === type)
+                          .map((coupon) => {
+                            const isValidCoupon = checkCouponCondition(coupon); // Kiểm tra điều kiện
+                            return (
+                              <div
+                                key={coupon.coupon_hashed_id}
+                                className={cn(
+                                  "flex items-stretch border border-gray-300 dark:border-none dark:bg-zinc-900 rounded-lg overflow-hidden cursor-pointer",
+                                  selectedCoupons[type]?.coupon_hashed_id ===
+                                    coupon.coupon_hashed_id &&
+                                    "border-orange-500 dark:border-orange-500 border-2",
+                                  !isValidCoupon &&
+                                    "opacity-50 cursor-not-allowed" // Nếu không đủ điều kiện, disable
+                                )}
+                                onClick={() =>
+                                  isValidCoupon && selectCoupon(coupon)
+                                } // Không cho chọn nếu không đủ điều kiện
+                              >
+                                {/* Phần hình ảnh */}
+                                <div className="w-24 flex-shrink-0 relative">
+                                  <img
+                                    // src={coupon.image || "/placeholder.svg"}
+                                    src="/placeholder.svg"
+                                    alt="coupon"
+                                    className="w-full h-full object-cover"
+                                  />
+                                  {selectedCoupons[type]?.coupon_hashed_id ===
+                                    coupon.coupon_hashed_id && (
+                                    <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5">
+                                      <Check size={14} className="text-white" />
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Phần nội dung */}
+                                <div className="flex flex-col flex-grow p-3">
+                                  <h4 className="font-bold text-base text-gray-800 dark:text-white">
+                                    {coupon.coupon_name}
+                                  </h4>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    Giảm tối đa: {coupon.coupon_max_value}
+                                  </p>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    Đơn tối thiểu: {coupon.coupon_condition}
+                                  </p>
+                                  <p className="text-xs text-gray-400 dark:text-gray-300 mt-1">
+                                    HSD: {coupon.end_time}
+                                  </p>
+                                </div>
+
+                                {/* Phần giảm giá */}
+                                <div className="bg-orange-500 text-white px-4 flex items-center justify-center text-lg font-bold">
+                                  {coupon.coupon_value}
+                                  {coupon.coupon_unit}
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </ScrollArea>
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           ))}
         </div>
       </section>
 
       {/* Sản phẩm đặt mua */}
-      <section className="lg:col-span-2 bg-white rounded-lg p-6 shadow-md h-fit dark:bg-gray-800">
+      <section className="lg:col-span-2 bg-white rounded-lg p-6 shadow-md h-fit dark:bg-gray-800 sticky top-24">
         <h3 className="font-bold mb-2 text-center">Sản phẩm đặt mua</h3>
         <hr className="mb-4 dark:border-white" />
         {productInfo ? (
@@ -644,15 +928,15 @@ export default function OrderInformationPage() {
             </p>
             <p className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">
-                Mã giảm giá
+                Ưu đãi phí vận chuyển
               </span>
-              <span>-{convertNumberToVND(couponDiscount)}</span>
+              <span>-{convertNumberToVND(getShippingDiscount())}</span>
             </p>
             <p className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">
-                Miễn phí vận chuyển
+                MeowHouse Voucher
               </span>
-              <span>-{convertNumberToVND(freeShippingDiscount)}</span>
+              <span>-{convertNumberToVND(getOrderDiscount())}</span>
             </p>
           </div>
           <div className="flex justify-between items-center mt-4 border-t pt-4 dark:border-white">

@@ -96,7 +96,13 @@ export default function HistoryOrder() {
 
   useEffect(() => {
     fetchOrders();
-  }, [session, activeTab, activeTab === "all" ? debouncedValue : null]);
+  }, [
+    session,
+    activeTab,
+    activeTab === "all" ? debouncedValue : null,
+    currentPage,
+    postsPerPage,
+  ]);
 
   const fetchOrders = async () => {
     if (!session && !session?.user?.accessToken) {
@@ -110,14 +116,14 @@ export default function HistoryOrder() {
 
       // Xử lý params dựa vào activeTab và searchTerm
       if (activeTab !== "all") {
-        url += `?status=${activeTab}`;
+        url += `&status=${activeTab}`;
       } else if (debouncedValue) {
         // Kiểm tra và gọi API phù hợp dựa vào định dạng searchTerm
         const cleanedSearch = debouncedValue.trim();
         if (isValidOrderId(cleanedSearch)) {
-          url += `?order_id=${cleanedSearch}`;
+          url += `&order_id=${cleanedSearch}`;
         } else {
-          url += `?product_name=${cleanedSearch}`;
+          url += `&product_name=${cleanedSearch}`;
         }
       }
 
@@ -157,7 +163,7 @@ export default function HistoryOrder() {
 
       setOrderCounts({
         ...resetCounts,
-        [activeTab]: responseData.data.orders.length,
+        [activeTab]: responseData.data.pagination.total,
       });
     } catch (error) {
       console.error("Error fetching orders:", error);

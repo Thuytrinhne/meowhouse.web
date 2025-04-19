@@ -165,6 +165,24 @@ const FormBody = ({
             <>
               <AdminCustomField
                 form={form}
+                fieldName="is_public"
+                type="switch"
+                title={
+                  PAGE_DATA["coupon-is-public"] ??
+                  "Công khai (User có thể tự thu thập)"
+                }
+                handleChange={() => {
+                  if (form.getValues("is_public") == true)
+                    form.setValue("is_public", true);
+                  else form.setValue("is_public", false);
+                  console.log(
+                    "Switched is_public:",
+                    form.getValues("is_public")
+                  );
+                }}
+              />
+              <AdminCustomField
+                form={form}
                 fieldName="coupon_name"
                 title={PAGE_DATA["coupon-name"]}
                 required={true}
@@ -228,6 +246,30 @@ const FormBody = ({
                   title={PAGE_DATA["coupon-end-time"]}
                   required={true}
                   type="datetime"
+                />
+                <AdminCustomField
+                  form={form}
+                  fieldName="auto_assign"
+                  type="checkbox"
+                  title={PAGE_DATA["coupon-auto-assign"]}
+                  checkboxValue={[true, false]}
+                  handleChange={() => {
+                    if (form.getValues("auto_assign") == true)
+                      form.setValue("auto_assign", true);
+                    else form.setValue("auto_assign", false);
+                  }}
+                />
+                <AdminCustomField
+                  form={form}
+                  fieldName="active"
+                  type="checkbox"
+                  title={PAGE_DATA["coupon-active"]}
+                  checkboxValue={[true, false]}
+                  handleChange={() => {
+                    if (form.getValues("active") == true)
+                      form.setValue("active", true);
+                    else form.setValue("active", false);
+                  }}
                 />
               </div>
             </>

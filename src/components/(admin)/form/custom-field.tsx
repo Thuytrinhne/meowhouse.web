@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ReactNode } from "react";
+import { Switch } from "@/components/ui/switch";
 
 const CustomFormField = ({
   form,
@@ -192,6 +193,17 @@ const CustomFormField = ({
   else if (type == "tags")
     children = ({ onChange, onBlur, value }) => (
       <InputTags value={value} onChange={onChange} />
+    );
+  else if (type == "switch")
+    children = ({ onChange, onBlur, value }) => (
+      <Switch
+        checked={value}
+        onCheckedChange={(v) => {
+          onChange(v);
+          handleChange();
+        }}
+        className="bg-gray-200 dark:bg-gray-600"
+      />
     );
   else children = ({ onChange, onBlur, value }) => <></>;
 

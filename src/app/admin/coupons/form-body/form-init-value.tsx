@@ -41,6 +41,15 @@ const getFormSchema = () => {
     is_all: z
       .boolean({ invalid_type_error: ERROR_DATA["invalid-type-number"] })
       .optional(),
+    is_public: z
+      .boolean({ invalid_type_error: ERROR_DATA["invalid-type-number"] })
+      .default(false),
+    auto_assign: z
+      .boolean({ invalid_type_error: ERROR_DATA["invalid-type-number"] })
+      .optional(),
+    active: z
+      .boolean({ invalid_type_error: ERROR_DATA["invalid-type-number"] })
+      .default(true),
   });
 };
 
