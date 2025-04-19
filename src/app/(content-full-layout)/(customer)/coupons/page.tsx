@@ -21,7 +21,7 @@ const handleSaveCoupon = async (
 ): Promise<boolean> => {
   try {
     const res = await postData(`${PUBLIC_CUSTOMER_COUPON_URL}/${userId}`, {
-      coupon_id_hashed: couponId,
+      coupon_hashed_id: couponId,
     });
 
     if (!res) return false;

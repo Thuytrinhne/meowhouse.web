@@ -94,7 +94,7 @@ export default function CardCoupon({
                 setSaveState("saving");
                 const isSuccess = await handleSaveCoupon(
                   userId,
-                  coupon.coupon_id_hashed
+                  coupon.coupon_hashed_id
                 );
                 if (isSuccess) setSaveState("saved");
                 else setSaveState("failed");
