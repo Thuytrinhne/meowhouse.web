@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 // import utils
 import { getLastName } from "@/utils/string-utils";
@@ -31,6 +32,36 @@ export default function UserSidebar() {
     }
   };
 
+  const getLevelStyle = (level: string | undefined) => {
+    switch (level?.toLowerCase()) {
+      case "diamond":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800";
+      case "gold":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 hover:bg-yellow-200 dark:hover:bg-yellow-800";
+      case "silver":
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600";
+      case "bronze":
+        return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-800";
+      default:
+        return "bg-muted text-muted-foreground dark:bg-gray-800 dark:text-white hover:bg-muted/80 dark:hover:bg-gray-700";
+    }
+  };
+
+  const getMembershipLabel = (level: string | undefined) => {
+    switch (level?.toLowerCase()) {
+      case "diamond":
+        return "Kim cương";
+      case "gold":
+        return "Vàng";
+      case "silver":
+        return "Bạc";
+      case "bronze":
+        return "Đồng";
+      default:
+        return "Thành viên mới";
+    }
+  };
+
   return (
     <>
       {/* Mobile Menu Button */}
@@ -44,7 +75,7 @@ export default function UserSidebar() {
       {/* Sidebar */}
       <Card
         className={`
-        md:flex h-auto md:h-[450px] w-full md:w-[300px] flex-col
+        md:flex h-auto md:h-[450px] w-full md:w-[380px] flex-col
         fixed md:relative top-0 left-0 z-40
         ${isMenuOpen ? "flex" : "hidden"}
         bg-white dark:bg-zinc-950
@@ -58,10 +89,23 @@ export default function UserSidebar() {
             <AvatarImage src={session?.user?.userAvt} alt="Avatar" />
             <AvatarFallback>TT</AvatarFallback>
           </Avatar>
-          <div>
-            <h5 className="font-semibold dark:text-white">
-              Chào {getLastName(session?.user?.name)}
-            </h5>
+          <div className="w-full">
+            <div className="flex justify-between align-middle">
+              <h5 className="font-semibold dark:text-white">
+                Chào {getLastName(session?.user?.name)}
+              </h5>
+              <div className="flex items-center gap-2">
+                <Badge
+                  className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${getLevelStyle(
+                    session?.user?.membershipLevel
+                  )}`}>
+                  {getMembershipLabel(session?.user?.membershipLevel)}
+                  <Link href="/membership">
+                    <span className="text-[10px] font-bold">{">"}</span>
+                  </Link>
+                </Badge>
+              </div>
+            </div>
             <Link href="/my-profile">
               <Button
                 variant="link"

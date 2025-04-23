@@ -16,9 +16,11 @@ export const authOptions: NextAuthOptions = {
         refreshToken: { label: "RefreshToken", type: "text" },
         expiresIn: { label: "ExpiresIn", type: "text" },
         userAvt: { label: "UserAvt", type: "text" },
+        membershipLevel: { label: "MembershipLevel", type: "text" },
       },
       async authorize(credentials) {
         try {
+          console.log("hello");
           if (credentials?.token) {
             return {
               id: credentials.id || "google-user",
@@ -29,6 +31,7 @@ export const authOptions: NextAuthOptions = {
               userAvt: credentials.userAvt,
               refreshToken: credentials.refreshToken || "",
               expiresIn: credentials.expiresIn || 3600,
+              membershipLevel: credentials.membershipLevel || "",
             };
           }
 
@@ -52,6 +55,7 @@ export const authOptions: NextAuthOptions = {
               userAvt: user.user_avt,
               refreshToken: response.data.refreshToken,
               expiresIn: response.data.expiresIn,
+              membershipLevel: user.membershipLevel,
             };
           }
 
@@ -73,6 +77,7 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
         token.accessTokenExpires = Date.now() + user.expiresIn * 1000;
+        token.membershipLevel = user.membershipLevel;
       }
 
       const shouldRefreshTime = Math.round(
@@ -113,6 +118,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role;
         session.user.accessToken = token.accessToken;
         session.user.refreshToken = token.refreshToken;
+        session.user.membershipLevel = token.membershipLevel;
       }
       return session;
     },

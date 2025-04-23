@@ -10,6 +10,7 @@ declare module "next-auth" {
       userAvt: string;
       accessToken: string;
       refreshToken?: string;
+      membershipLevel: string;
     };
   }
 
@@ -22,6 +23,7 @@ declare module "next-auth" {
     accessToken: string;
     refreshToken?: string;
     expiresIn: number;
+    membershipLevel: string;
   }
 }
 
@@ -33,6 +35,7 @@ declare module "next-auth/jwt" {
     accessToken: string;
     refreshToken?: string;
     accessTokenExpires: number;
+    membershipLevel: string;
     error?: string;
   }
 }

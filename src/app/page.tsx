@@ -49,6 +49,7 @@ export default function Home() {
               refreshToken,
               expiresIn,
               redirect: false,
+              membershipLevel: user.membership_level,
             });
 
             if (result?.error) {
