@@ -44,23 +44,47 @@ const OrderActions = ({
     router.push(`/rating?pid=${order.order_id_hashed}`);
   };
 
+  const viewReview = () => {
+    onReview?.(order._id);
+    router.push(`/rating-detail?pid=${order.order_id_hashed}`);
+  };
+
   const actionButtons: Record<StatusType, ActionButton[]> = {
-    delivered: [
-      {
-        label: "Mua lại",
-        icon: <RefreshCw size={30} strokeWidth={1.2} />,
-        variant: "filled_outlined" as const,
-        className:
-          " tex-base font-medium px-14 text-text-btn-color border-pri-7",
-        onClick: handleRepurchase,
-      },
-      {
-        label: "Đánh giá",
-        variant: "filled" as const,
-        className: "bg-pri-7 text-base font-medium px-14",
-        onClick: handleReview,
-      },
-    ],
+    delivered:
+      order.order_rating.length > 0
+        ? [
+            {
+              label: "Mua lại",
+              icon: <RefreshCw size={30} strokeWidth={1.2} />,
+              variant: "filled_outlined",
+              className:
+                "tex-base font-medium px-14 text-text-btn-color border-pri-7",
+              onClick: handleRepurchase,
+            },
+            {
+              label: "Xem đánh giá",
+              variant: "filled_outlined",
+              className:
+                "text-gray-700 border-gray-400 text-base font-medium px-14 hover:bg-gray-100",
+              onClick: viewReview,
+            },
+          ]
+        : [
+            {
+              label: "Mua lại",
+              icon: <RefreshCw size={30} strokeWidth={1.2} />,
+              variant: "filled_outlined",
+              className:
+                "tex-base font-medium px-14 text-text-btn-color border-pri-7",
+              onClick: handleRepurchase,
+            },
+            {
+              label: "Đánh giá",
+              variant: "filled",
+              className: "bg-pri-7 text-base font-medium px-14",
+              onClick: handleReview,
+            },
+          ],
     unpaid: [
       {
         label: "Thanh toán",

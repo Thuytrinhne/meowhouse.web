@@ -44,7 +44,6 @@ export default function ProductDetailsPage() {
 
         if (data.success && data.data?.product) {
           setProductData(data.data.product);
-          console.log("Fetched product data:", data.data.product);
         } else {
           notFound();
         }

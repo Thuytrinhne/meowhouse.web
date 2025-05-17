@@ -93,7 +93,7 @@ export interface IProductDetail {
   product_specifications: ISpecification[];
   product_variants: IVariant[];
   review_count: number[];
-  recent_reviews: IReview[];
+  recent_reviews: Review[];
   createdAt: string;
   updatedAt: string;
 }
@@ -106,15 +106,6 @@ export interface IVariant {
   variant_stock_quantity: number;
   variant_discount_percent: number;
   _id: string;
-}
-
-export interface IReview {
-  id: number;
-  user: string;
-  date: string;
-  rating: number;
-  title: string;
-  content: string;
 }
 
 export interface ISpecification {

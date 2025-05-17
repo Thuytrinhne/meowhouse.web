@@ -34,4 +34,5 @@ export interface Order {
   payment_method: string;
   createdAt: string | null;
   order_id_hashed: string;
+  order_rating: [];
 }
