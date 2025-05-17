@@ -1,7 +1,15 @@
 "use client";
 
 // import libs
-import { Home, LogOut, NotepadText, User, Menu } from "lucide-react";
+import {
+  Home,
+  LogOut,
+  NotepadText,
+  User,
+  Menu,
+  CircleDollarSign,
+  Ticket,
+} from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
@@ -75,7 +83,7 @@ export default function UserSidebar() {
       {/* Sidebar */}
       <Card
         className={`
-        md:flex h-auto md:h-[450px] w-full md:w-[380px] flex-col
+        md:flex h-auto md:h-[540px] w-full md:w-[380px] flex-col
         fixed md:relative top-0 left-0 z-40
         ${isMenuOpen ? "flex" : "hidden"}
         bg-white dark:bg-zinc-950
@@ -173,8 +181,23 @@ export default function UserSidebar() {
                     : "dark:text-gray-300 dark:hover:bg-gray-700"
                 }
               `}>
-              <NotepadText className="h-5 md:h-6 w-5 md:w-6" />
+              <Ticket className="h-5 md:h-6 w-5 md:w-6" />
               Kho ưu đãi
+            </Button>
+          </Link>
+
+          <Link href="/reward-points">
+            <Button
+              variant="ghost"
+              className={`w-full justify-start gap-3 text-sm md:text-base px-4 md:px-6 py-5 md:py-7
+                ${
+                  pathname.includes("/reward-points")
+                    ? "bg-selected-nav text-pri-1 font-bold rounded-none dark:bg-gray-900 dark:text-white"
+                    : "dark:text-gray-300 dark:hover:bg-gray-700"
+                }
+              `}>
+              <CircleDollarSign className="h-5 md:h-6 w-5 md:w-6" />
+              Meow House Xu
             </Button>
           </Link>
         </nav>
