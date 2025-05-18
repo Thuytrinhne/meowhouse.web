@@ -25,7 +25,7 @@ export default function RedeemPage() {
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
             <Image
-              src="/placeholder.svg?height=32&width=32"
+              src="/imgs/points/coin.png"
               width={24}
               height={24}
               alt="Coin"

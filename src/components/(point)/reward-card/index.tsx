@@ -105,7 +105,7 @@ export default function RewardCard({
             <div className="mt-3 flex items-center justify-between">
               <div className="flex items-center gap-1">
                 <Image
-                  src="/placeholder.svg?height=16&width=16"
+                  src="/imgs/points/coin.png"
                   width={16}
                   height={16}
                   alt="Coin"

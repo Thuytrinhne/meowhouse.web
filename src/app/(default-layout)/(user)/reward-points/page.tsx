@@ -1,3 +1,4 @@
+"use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,8 +15,28 @@ import PointsHistory from "@/components/(point)/points-history";
 import PointsEarned from "@/components/(point)/points-earned";
 import PointsUsed from "@/components/(point)/points-used";
 import MorePoints from "@/components/(point)/more-points";
+import { useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { fetchWithAuth } from "@/utils/functions/server";
+import { USER_POINTS } from "@/utils/constants/urls";
 
 export default function PointsPage() {
+  const [summary, setSummary] = useState<PointsSummary | null>(null);
+
+  const fetchSummary = async () => {
+    try {
+      const res = await fetchWithAuth(`${USER_POINTS}/summary`);
+      if (res.success) {
+        setSummary(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch point summary:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchSummary();
+  }, []);
   return (
     <div className="w-[100%] dark:bg-black dark:border-gray-700 mx-auto bg-pink-50 min-h-screen">
       {/* Header */}
@@ -34,7 +55,9 @@ export default function PointsPage() {
         <div className="flex items-start">
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-5xl font-bold text-white">100</h2>
+              <h2 className="text-5xl font-bold text-white">
+                {summary?.available_points ?? 0}
+              </h2>
               <span className="text-amber-700 font-medium">Xu khả dụng</span>
               <Button
                 variant="ghost"
@@ -43,16 +66,27 @@ export default function PointsPage() {
                 <HelpCircle className="h-4 w-4 text-amber-700" />
               </Button>
             </div>
-            <p className="text-amber-700 mt-1">
-              100 xu sẽ hết hạn vào 30-06-2025
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full h-6 w-6 p-0 ml-1">
-                <HelpCircle className="h-4 w-4 text-amber-700" />
-              </Button>
-            </p>
+
+            {summary?.expiring_points?.length > 0 && (
+              <div className="text-amber-700 mt-1 space-y-1">
+                {summary.expiring_points.map((p, idx) => (
+                  <div key={idx} className="flex items-center text-sm">
+                    <span>
+                      {p.amount} xu sẽ hết hạn vào{" "}
+                      {dayjs(p.expires_at).format("DD-MM-YYYY")}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full h-6 w-6 p-0 ml-1">
+                      <HelpCircle className="h-4 w-4 text-amber-700" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+
           <Button className="bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg">
             Tìm thêm xu
           </Button>

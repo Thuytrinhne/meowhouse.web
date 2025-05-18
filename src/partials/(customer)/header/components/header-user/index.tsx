@@ -116,6 +116,14 @@ export default function CustomerHeaderUser() {
               </Link>
             </li>
             <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer font-medium text-pri hover:text-teal-600">
+              <Link
+                href="/reward-points"
+                className="flex items-center space-x-4 text-pri-1 dark:text-white hover:text-teal-600 dark:hover:text-teal-300">
+                <ScrollText />
+                <span className="font-medium">MeowHouse Xu</span>
+              </Link>
+            </li>
+            <li className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer font-medium text-pri hover:text-teal-600">
               <button
                 onClick={handleSignOut}
                 className="flex items-center space-x-4 text-pri-1 dark:text-white hover:text-teal-600 dark:hover:text-teal-300">

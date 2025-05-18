@@ -12,6 +12,8 @@ export const ADMIN_NOTIFICATIONS = API_BASE_URL + "/admin/notifications";
 export const ADMIN_USERS_URL = `${process.env.BACKEND_URL}/admin/users`;
 export const PUBLIC_ADMIN_USERS_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/users`;
 
+export const USER_POINTS = API_BASE_URL + "/points";
+
 export const ADMIN_GROUPS_URL = `${process.env.BACKEND_URL}/admin/groups`;
 export const PUBLIC_ADMIN_GROUPS_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/groups`;
 

@@ -1,27 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import Image from "next/image";
+import { USER_POINTS } from "@/utils/constants/urls";
+import { useSession } from "next-auth/react";
+import { fetchWithAuth } from "@/utils/functions/server";
 
 export default function DailyCheckIn() {
+  const [days, setDays] = useState([]);
   const [currentDay, setCurrentDay] = useState(1);
-  const [claimedToday, setClaimedToday] = useState(true);
+  const [claimedToday, setClaimedToday] = useState(false);
 
-  const days = [
-    { day: "Hôm nay", points: 100 },
-    { day: "Ngày 2", points: 100 },
-    { day: "Ngày 3", points: 100 },
-    { day: "Ngày 4", points: 100 },
-    { day: "Ngày 5", points: 100 },
-    { day: "Ngày 6", points: 100 },
-    { day: "Ngày 7", points: 200 },
-  ];
+  const fetchStatus = async () => {
+    try {
+      const res = await fetchWithAuth(`${USER_POINTS}/checkin/status`);
+      if (res.success && res.data) {
+        const data = res.data;
+        setClaimedToday(!data.can_checkin_today);
+        if (!data.can_checkin_today) {
+          setCurrentDay(data.current_day_index - 1);
+        } else {
+          setCurrentDay(data.current_day_index);
+        }
+        setDays(data.days);
+      }
+    } catch (err) {
+      console.error("Error fetching checkin status:", err);
+    }
+  };
+  useEffect(() => {
+    fetchStatus();
+  }, []);
 
-  const handleClaimExtra = () => {
-    alert("Đã nhận thêm 2.600 xu!");
+  const handleCheckin = async () => {
+    try {
+      const res = await fetchWithAuth(`${USER_POINTS}/checkin`, {
+        method: "POST",
+      });
+      const data = res.data;
+
+      if (res.success) {
+        setClaimedToday(true);
+        alert(`✅ Nhận ${data.reward} xu cho ngày ${data.day_index}`);
+        await fetchStatus();
+      } else {
+        alert(`❌ ${data.message || "Check-in thất bại"}`);
+      }
+    } catch (err) {
+      console.error("Check-in failed:", err);
+      alert("Đã xảy ra lỗi. Vui lòng thử lại.");
+    }
   };
 
   return (
@@ -30,64 +61,70 @@ export default function DailyCheckIn() {
         <CardContent className="p-0">
           <div className="grid grid-cols-7 gap-1 p-4 bg-white">
             {days.map((day, index) => (
-              <div
-                key={index}
-                className={`flex flex-col items-center ${index === 6 ? "col-span-1" : ""}`}>
+              <div key={index} className="flex flex-col items-center">
                 <div
                   className={`
-                    relative w-full aspect-square rounded-md flex flex-col items-center justify-center p-1
-                    ${
-                      index === 0 && claimedToday
+                  relative w-full aspect-square rounded-md flex flex-col items-center justify-center p-1
+                  ${
+                    index + 1 === currentDay
+                      ? claimedToday
                         ? "border-2 border-red-400 bg-red-50"
-                        : index < currentDay
-                          ? "bg-gray-100"
-                          : index === 6
-                            ? "bg-amber-100"
-                            : "bg-amber-50"
-                    }
-                  `}>
-                  {index === 0 && claimedToday && (
-                    <div className="absolute top-1 right-1 bg-red-500 rounded-full p-0.5">
-                      <Check className="h-3 w-3 text-white" />
+                        : "border border-red-300 bg-white"
+                      : day.checked_in
+                        ? "bg-gray-100"
+                        : index === 6
+                          ? "bg-amber-100"
+                          : "bg-amber-50"
+                  }
+                `}>
+                  {day.checked_in ? (
+                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                      <Check className="text-white w-5 h-5" />
                     </div>
-                  )}
-
-                  <div className="text-amber-500 font-bold text-sm">
-                    +{day.points}
-                  </div>
-
-                  <div className="mt-1">
+                  ) : (
                     <div className="w-8 h-8 rounded-full bg-amber-200 flex items-center justify-center">
                       <Image
-                        src="/placeholder.svg?height=32&width=32"
-                        width={24}
-                        height={24}
+                        src="/imgs/points/coin.png"
+                        width={40}
+                        height={40}
                         alt="Coin"
                         className="object-contain"
                       />
                     </div>
+                  )}
+
+                  <div className="text-amber-500 font-bold text-sm mt-1">
+                    +{day.reward}
                   </div>
                 </div>
                 <div className="text-xs mt-1 text-center text-gray-600">
-                  {day.day}
+                  {day.day === currentDay ? "Hôm nay" : `Ngày ${day.day}`}
                 </div>
               </div>
             ))}
           </div>
 
-          <Button
-            onClick={handleClaimExtra}
-            className="w-full py-6 rounded-none bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-bold text-lg">
-            Nhận thêm{" "}
-            <Image
-              src="/placeholder.svg?height=24&width=24"
-              width={24}
-              height={24}
-              alt="Coin"
-              className="mx-1"
-            />{" "}
-            2.600 hôm nay!
-          </Button>
+          {claimedToday ? (
+            <Button
+              disabled
+              className="w-full py-6 rounded-none bg-gray-300 text-gray-700 font-bold text-lg cursor-not-allowed">
+              Đã nhận
+            </Button>
+          ) : (
+            <Button
+              onClick={handleCheckin}
+              className="w-full py-6 rounded-none bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-bold text-lg flex items-center justify-center">
+              Nhận ngay
+              <Image
+                src="/imgs/points/coin.png"
+                width={40}
+                height={40}
+                alt="Coin"
+                className="ml-2"
+              />
+              100 xu
+            </Button>
+          )}
         </CardContent>
       </Card>
     </div>

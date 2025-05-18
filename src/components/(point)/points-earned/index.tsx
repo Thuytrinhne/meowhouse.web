@@ -38,7 +38,7 @@ export default function PointsEarned() {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
                 <Image
-                  src="/placeholder.svg?height=40&width=40"
+                  src="/imgs/points/coin.png"
                   width={24}
                   height={24}
                   alt="Coin"

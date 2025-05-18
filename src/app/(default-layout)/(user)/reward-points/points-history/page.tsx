@@ -132,7 +132,7 @@ export default function PointsHistoryPage() {
                       <div className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Image
-                            src="/placeholder.svg?height=16&width=16"
+                            src="/imgs/points/coin.png"
                             width={16}
                             height={16}
                             alt="Coin"
@@ -192,7 +192,7 @@ export default function PointsHistoryPage() {
                         <div className="text-right">
                           <div className="flex items-center justify-end gap-1">
                             <Image
-                              src="/placeholder.svg?height=16&width=16"
+                              src="/imgs/points/coin.png"
                               width={16}
                               height={16}
                               alt="Coin"
@@ -248,7 +248,7 @@ export default function PointsHistoryPage() {
                         <div className="text-right">
                           <div className="flex items-center justify-end gap-1">
                             <Image
-                              src="/placeholder.svg?height=16&width=16"
+                              src="/imgs/points/coin.png"
                               width={16}
                               height={16}
                               alt="Coin"
