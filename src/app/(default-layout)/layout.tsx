@@ -16,6 +16,16 @@ const breadcrumbMap: Record<string, { label: string; href?: string }[]> = {
     { label: "Trang cá nhân", href: "/my-profile" },
     { label: "Thông tin tài khoản" },
   ],
+  "/reward-points/redeem": [
+    { label: "Trang chủ", href: "/" },
+    { label: "Trang Meowhouse xu", href: "/reward-points" },
+    { label: "Trang đổi xu" },
+  ],
+  "/reward-points": [
+    { label: "Trang chủ", href: "/" },
+    { label: "Trang Meowhouse xu", href: "/reward-points" },
+    { label: "Trang Meowhouse xu" },
+  ],
   "/address": [
     { label: "Trang chủ", href: "/" },
     { label: "Trang cá nhân", href: "/my-profile" },

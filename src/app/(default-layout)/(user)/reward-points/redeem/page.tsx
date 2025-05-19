@@ -1,3 +1,4 @@
+"use client";
 import { ArrowLeft, Search, Filter, PawPrintIcon as Paw } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -5,8 +6,42 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RewardCard from "@/components/(point)/reward-card";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { fetchWithAuth } from "@/utils/functions/server";
+import { USER_POINTS } from "@/utils/constants/urls";
 
 export default function RedeemPage() {
+  const [availablePoints, setAvailablePoints] = useState(0);
+
+  const [rewards, setRewards] = useState([]);
+
+  useEffect(() => {
+    const fetchRewards = async () => {
+      const res = await fetchWithAuth("/api/rewards?type=all");
+      const json = await res.json();
+      if (json.success) setRewards(json.data);
+    };
+    fetchRewards();
+  }, []);
+
+  const fetchPoints = async () => {
+    try {
+      const res = await fetchWithAuth(`${USER_POINTS}/summary`);
+      if (res.success) {
+        setAvailablePoints(res.data.available_points);
+      }
+    } catch (error) {
+      console.error("Failed to fetch available points:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPoints();
+  }, []);
+  const vouchers = rewards.filter((r) => r.type === "voucher");
+  const gifts = rewards.filter((r) => r.type === "gift");
+  const specials = rewards.filter((r) => r.type === "special");
+
   return (
     <div className="w-[100%] dark:bg-black dark:border-gray-700 mx-auto bg-pink-50 min-h-screen">
       {/* Header */}
@@ -34,7 +69,7 @@ export default function RedeemPage() {
           </div>
           <div>
             <span className="text-amber-800 text-sm">Xu khả dụng</span>
-            <h2 className="text-xl font-bold text-white">100</h2>
+            <h2 className="text-xl font-bold text-white">{availablePoints}</h2>
           </div>
         </div>
         <Link href="points-history">

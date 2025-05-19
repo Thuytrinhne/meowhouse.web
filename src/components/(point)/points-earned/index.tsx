@@ -1,57 +1,60 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { PawPrintIcon as Paw, ShoppingBag } from "lucide-react";
-import Image from "next/image";
+import { PawPrintIcon as Paw, ShoppingBag, Users } from "lucide-react";
+import { fetchWithAuth } from "@/utils/functions/server"; // đã có sẵn trong project
+import dayjs from "dayjs";
+import { USER_POINTS } from "@/utils/constants/urls";
 
 export default function PointsEarned() {
-  const transactions = [
-    {
-      id: 1,
-      title: "Đăng nhập mỗi ngày",
-      description: "Meow House Xu từ đăng nhập mỗi ngày",
-      date: "20:38 17-05-2025",
-      amount: 100,
-      icon: <Paw className="h-4 w-4" />,
-    },
-    {
-      id: 2,
-      title: "Hoàn thành đơn hàng",
-      description: "Đơn hàng #MH12345",
-      date: "14:22 15-05-2025",
-      amount: 250,
-      icon: <ShoppingBag className="h-4 w-4" />,
-    },
-    {
-      id: 3,
-      title: "Giới thiệu bạn bè",
-      description: "Bạn bè đăng ký thành công",
-      date: "11:05 12-05-2025",
-      amount: 500,
-      icon: <Paw className="h-4 w-4" />,
-    },
-  ];
+  const [transactions, setTransactions] = useState([]);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const res = await fetchWithAuth(`${USER_POINTS}/history?type=earn`);
+        if (res.success && res.data) {
+          setTransactions(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch transactions", err);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
+  const getIcon = (source: string) => {
+    switch (source) {
+      case "daily_checkin":
+        return <Paw className="h-4 w-4 text-amber-500" />;
+      case "purchase":
+        return <ShoppingBag className="h-4 w-4 text-green-500" />;
+      case "referral":
+        return <Users className="h-4 w-4 text-blue-500" />;
+      default:
+        return <Paw className="h-4 w-4 text-gray-400" />;
+    }
+  };
 
   return (
     <div className="space-y-4">
-      {transactions.map((transaction) => (
-        <Card key={transaction.id} className="border-none shadow-sm">
+      {transactions.map((transaction: any) => (
+        <Card key={transaction._id} className="border-none shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                <Image
-                  src="/imgs/points/coin.png"
-                  width={24}
-                  height={24}
-                  alt="Coin"
-                  className="object-contain"
-                />
+                {getIcon(transaction.source)}
               </div>
 
               <div className="flex-1">
-                <h3 className="font-medium">{transaction.title}</h3>
-                <p className="text-sm text-gray-500">
-                  {transaction.description}
+                <h3 className="font-medium">
+                  {transaction.description || "Giao dịch nhận điểm"}
+                </h3>
+                <p className="text-xs text-gray-400 mt-1">
+                  {dayjs(transaction.createdAt).format("HH:mm DD-MM-YYYY")}
                 </p>
-                <p className="text-xs text-gray-400 mt-1">{transaction.date}</p>
               </div>
 
               <div className="font-bold text-amber-500">
@@ -63,7 +66,7 @@ export default function PointsEarned() {
       ))}
 
       <p className="text-center text-sm text-gray-400 py-4">
-        Only transactions within the past year are displayed
+        Chỉ hiển thị giao dịch trong vòng 1 năm gần nhất
       </p>
     </div>
   );

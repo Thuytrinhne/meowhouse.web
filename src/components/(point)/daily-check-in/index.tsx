@@ -9,7 +9,7 @@ import { USER_POINTS } from "@/utils/constants/urls";
 import { useSession } from "next-auth/react";
 import { fetchWithAuth } from "@/utils/functions/server";
 
-export default function DailyCheckIn() {
+export default function DailyCheckIn({ onEarned }: { onEarned?: () => void }) {
   const [days, setDays] = useState([]);
   const [currentDay, setCurrentDay] = useState(1);
   const [claimedToday, setClaimedToday] = useState(false);
@@ -45,6 +45,8 @@ export default function DailyCheckIn() {
       if (res.success) {
         setClaimedToday(true);
         alert(`✅ Nhận ${data.reward} xu cho ngày ${data.day_index}`);
+        onEarned?.();
+
         await fetchStatus();
       } else {
         alert(`❌ ${data.message || "Check-in thất bại"}`);
@@ -108,7 +110,7 @@ export default function DailyCheckIn() {
             <Button
               disabled
               className="w-full py-6 rounded-none bg-gray-300 text-gray-700 font-bold text-lg cursor-not-allowed">
-              Đã nhận
+              Đã nhận, quay lại MeowHouse vào hôm sau bạn nhé !!!
             </Button>
           ) : (
             <Button

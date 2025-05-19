@@ -19,9 +19,11 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { fetchWithAuth } from "@/utils/functions/server";
 import { USER_POINTS } from "@/utils/constants/urls";
+import { useRouter } from "next/navigation"; // thêm import này
 
 export default function PointsPage() {
   const [summary, setSummary] = useState<PointsSummary | null>(null);
+  const router = useRouter();
 
   const fetchSummary = async () => {
     try {
@@ -87,8 +89,10 @@ export default function PointsPage() {
             )}
           </div>
 
-          <Button className="bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg">
-            Tìm thêm xu
+          <Button
+            className="bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg"
+            onClick={() => router.push("reward-points/redeem")}>
+            Đổi xu
           </Button>
         </div>
 
@@ -139,7 +143,7 @@ export default function PointsPage() {
         </TabsList>
 
         <TabsContent value="daily" className="mt-4">
-          <DailyCheckIn />
+          <DailyCheckIn onEarned={fetchSummary} />
         </TabsContent>
 
         <TabsContent value="history" className="mt-4">
