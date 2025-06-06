@@ -51,7 +51,7 @@ const OrderActions = ({
 
   const actionButtons: Record<StatusType, ActionButton[]> = {
     delivered:
-      order.order_rating.length > 0
+      order.order_rating?.length > 0
         ? [
             {
               label: "Mua lại",
