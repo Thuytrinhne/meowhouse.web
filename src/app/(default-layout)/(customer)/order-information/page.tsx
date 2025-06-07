@@ -52,6 +52,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { ICoupon } from "@/types/interfaces";
 import { PUBLIC_CUSTOMER_COUPON_URL } from "@/utils/constants/urls";
+import { fetchWithAuth } from "@/utils/functions/server";
 // Định nghĩa kiểu dữ liệu cho mã giảm giá
 type CouponType = "Free Ship" | "Order";
 
@@ -152,19 +153,10 @@ export default function OrderInformationPage() {
     const fetchAddresses = async () => {
       if (!session?.user?.accessToken) return;
       try {
-        const response = await fetch(
-          `${USER_URL}/${session?.user?.id}/addresses`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${session.user.accessToken}`,
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-          }
+        const data = await fetchWithAuth(
+          `${USER_URL}/${session?.user?.id}/addresses`
         );
-        const data = await response.json();
-        console.log(data);
+
         if (data.success) {
           setAddresses(data.data);
           setDefaultAddresses(

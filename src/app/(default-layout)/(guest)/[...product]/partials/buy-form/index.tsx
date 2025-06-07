@@ -32,6 +32,7 @@ export default function CustomerProductBuyForm({
     if (inputQuantity > maxQuantity) {
       onQuantityChange(maxQuantity);
     }
+    console.log("arv", avgRating);
   }, [selectedVariantIndex]);
 
   // Hàm mua ngay
@@ -129,6 +130,7 @@ export default function CustomerProductBuyForm({
       <CustomerStarRating
         product_avg_rating={avgRating.rating_point ?? 0}
         product_sold_quantity={productSoldQuantity ?? 0}
+        product_rating_count={avgRating.rating_count ?? 0}
       />
 
       <div className="mb-4">

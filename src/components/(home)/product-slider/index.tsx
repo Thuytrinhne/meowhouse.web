@@ -53,7 +53,7 @@ export default function ProductSlider() {
       product_img: product.product_img,
       product_name: product.product_name,
       category_name: product.category_name,
-      product_avg_rating: product.product_avg_rating.rating_point,
+      product_avg_rating: product.product_avg_rating?.rating_point,
       product_sold_quantity: product.product_sold_quantity,
       variant_name: hasMultipleVariants
         ? product.variant_names.map((v: any) => v || "")
@@ -61,6 +61,7 @@ export default function ProductSlider() {
       product_price: product.product_price,
       lowest_price: product.lowest_price,
       highest_discount: product.highest_discount,
+      product_rating_count: product.product_avg_rating?.rating_count,
     };
   };
 

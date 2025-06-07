@@ -44,6 +44,7 @@ export default function NewProducts() {
       product_price: product.product_price,
       lowest_price: product.lowest_price,
       highest_discount: product.highest_discount,
+      product_rating_count: product.product_avg_rating?.rating_count,
     };
   };
 

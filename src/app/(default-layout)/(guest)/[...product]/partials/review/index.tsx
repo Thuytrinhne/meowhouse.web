@@ -2,12 +2,20 @@
 
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import CustomerStarRating from "@/components/(general)/star-rating";
 
 interface ReviewProps {
   reviews: Review[];
+  product_avg_rating: {
+    rating_point: number;
+    rating_count: number;
+  };
 }
 
-export default function CustomerReview({ reviews }: ReviewProps) {
+export default function CustomerReview({
+  reviews,
+  product_avg_rating,
+}: ReviewProps) {
   const [selectedImgs, setSelectedImgs] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
@@ -46,10 +54,16 @@ export default function CustomerReview({ reviews }: ReviewProps) {
       </h2>
 
       <div className="flex items-center space-x-2 mb-2">
-        <span className="text-yellow-500">★★★★☆</span>
-        <span className="text-lg font-semibold dark:text-white">4.1</span>
+        <CustomerStarRating
+          product_avg_rating={product_avg_rating.rating_point}
+          product_rating_count={product_avg_rating.rating_count}
+          product_sold_quantity={undefined}
+        />
+        <span className="text-lg font-semibold dark:text-white">
+          {product_avg_rating.rating_point}
+        </span>
         <span className="text-gray-500 dark:text-gray-400">
-          Dựa trên {reviews.length} đánh giá
+          Dựa trên {product_avg_rating.rating_count} đánh giá
         </span>
       </div>
 

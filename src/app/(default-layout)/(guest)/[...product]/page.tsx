@@ -125,7 +125,10 @@ export default function ProductDetailsPage() {
             description={productData.product_description}
           />
         ) : (
-          <CustomerProductReview reviews={productData.recent_reviews} />
+          <CustomerProductReview
+            reviews={productData.recent_reviews}
+            product_avg_rating={productData.product_avg_rating}
+          />
         )}
       </section>
     </div>

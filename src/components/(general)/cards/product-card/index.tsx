@@ -62,6 +62,7 @@ export default function ProductCard({ product, className }: ProductCardProps) {
         <CustomerStarRating
           product_avg_rating={product.product_avg_rating ?? 0}
           product_sold_quantity={product.product_sold_quantity ?? 0}
+          product_rating_count={product.product_rating_count}
         />
 
         {/* Variant */}

@@ -81,6 +81,7 @@ export default function RatingPage() {
         // Map the order products to the IRatingProduct structure
         const formattedProducts = orderProducts.map((product: any) => ({
           id: product.product_id,
+          variant_id: product.variant_id,
           name: product.product_name,
           variant: product.variant_name,
           price: product.unit_price,
@@ -179,6 +180,8 @@ export default function RatingPage() {
         // for (const pair of formData.entries()) {
         //   console.log(`${pair[0]}:`, pair[1]);
         // }
+        console.log("variant", product.variant);
+        formData.append("variantId", product.variant_id.toString());
 
         return {
           productId: product.id,

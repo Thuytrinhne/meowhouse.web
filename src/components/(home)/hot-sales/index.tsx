@@ -45,6 +45,7 @@ export default function HotSales() {
         product.lowest_price / (1 - product.highest_discount / 100),
       lowest_price: product.lowest_price,
       highest_discount: product.highest_discount,
+      product_rating_count: product.product_avg_rating?.rating_count,
     };
   };
 

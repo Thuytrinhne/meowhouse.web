@@ -33,4 +33,5 @@ export interface IProductProps {
   lowest_price: number;
   highest_discount: number;
   show_variants?: boolean; // Add this flag
+  product_rating_count: number;
 }

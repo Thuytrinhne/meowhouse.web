@@ -24,17 +24,34 @@ export default function ContactSection() {
             chúng tôi qua messenger, thật đơn giản và nhanh chóng!
           </p>
           <div className="flex gap-4">
-            {["fb_icon", "instagam_icon", "tiktok_icon"].map((icon) => (
-              <Link key={icon} href="#" className="hover:opacity-80">
-                <Image
-                  src={`/imgs/home/${icon}.svg`}
-                  alt={icon.split("_")[0]}
-                  width={60}
-                  height={60}
-                  className="rounded-xl w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]"
-                />
-              </Link>
-            ))}
+            {["fb_icon", "instagam_icon", "tiktok_icon"].map((icon) => {
+              let href = "#";
+
+              if (icon === "fb_icon")
+                href =
+                  "https://www.messenger.com/t/607329442463745/?messaging_source=source%3Apages%3Amessage_shortlink&source_id=1441792&recurring_notification=0";
+              else if (icon === "instagam_icon")
+                href = "https://www.instagram.com/your_instagram_profile";
+              else if (icon === "tiktok_icon")
+                href = "https://www.tiktok.com/@your_tiktok_profile";
+
+              return (
+                <Link
+                  key={icon}
+                  href={href}
+                  className="hover:opacity-80"
+                  target="_blank"
+                  rel="noopener noreferrer">
+                  <Image
+                    src={`/imgs/home/${icon}.svg`}
+                    alt={icon.split("_")[0]}
+                    width={60}
+                    height={60}
+                    className="rounded-xl w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]"
+                  />
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -85,17 +102,33 @@ export default function ContactSection() {
             chức các cuộc thi thú vị với những phần quà hấp dẫn mỗi tháng!
           </p>
           <div className="flex gap-4">
-            {["fb_icon", "instagam_icon", "tiktok_icon"].map((icon) => (
-              <Link key={icon} href="#" className="hover:opacity-80">
-                <Image
-                  src={`/imgs/home/${icon}.svg`}
-                  alt={icon.split("_")[0]}
-                  width={60}
-                  height={60}
-                  className="rounded-xl w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]"
-                />
-              </Link>
-            ))}
+            {["fb_icon", "instagam_icon", "tiktok_icon"].map((icon) => {
+              let href = "#"; // default nếu chưa xác định
+
+              if (icon === "fb_icon")
+                href = "https://www.facebook.com/meowhouse.pet";
+              else if (icon === "instagam_icon")
+                href = "https://www.instagram.com/your_instagram_profile";
+              else if (icon === "tiktok_icon")
+                href = "https://www.tiktok.com/@your_tiktok_profile";
+
+              return (
+                <Link
+                  key={icon}
+                  href={href}
+                  className="hover:opacity-80"
+                  target="_blank"
+                  rel="noopener noreferrer">
+                  <Image
+                    src={`/imgs/home/${icon}.svg`}
+                    alt={icon.split("_")[0]}
+                    width={60}
+                    height={60}
+                    className="rounded-xl w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]"
+                  />
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>

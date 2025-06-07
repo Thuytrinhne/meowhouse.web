@@ -1,24 +1,22 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState, useRef } from "react";
 import { GUEST_BLOG_URL } from "@/utils/constants/urls";
 import Link from "next/link";
 import { BlogCardShort } from "@/components";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function BlogListing() {
   const [featuredBlogs, setFeaturedBlogs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const scrollRef = useRef(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Hàm fetch dữ liệu từ API
-  const fetchBlogs = async (page = 1) => {
+  const fetchBlogs = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${GUEST_BLOG_URL}?page=${page}&limit=100`); // Lấy toàn bộ bài viết
+      const res = await fetch(`${GUEST_BLOG_URL}?page=1&limit=100`);
       const data = await res.json();
-
       if (data.status === 200 && data.success) {
-        // Lấy tất cả bài viết từ API mà không cần chọn ngẫu nhiên
         setFeaturedBlogs(data.data.articles);
       } else {
         console.error("Failed to fetch articles:", data);
@@ -31,49 +29,21 @@ export default function BlogListing() {
   };
 
   useEffect(() => {
-    fetchBlogs(1); // Fetch blogs once on component mount
-  }, []); // Chỉ gọi 1 lần khi component mount
+    fetchBlogs();
+  }, []);
 
-  useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    let scrollInterval: NodeJS.Timeout; // Định nghĩa kiểu rõ ràng cho scrollInterval
+  const scrollByAmount = 300;
 
-    const startScrolling = () => {
-      scrollInterval = setInterval(() => {
-        if (scrollContainer) {
-          if (
-            scrollContainer.scrollLeft >=
-            scrollContainer.scrollWidth - scrollContainer.clientWidth
-          ) {
-            scrollContainer.scrollLeft = 0; // Reset scroll to start
-          } else {
-            scrollContainer.scrollLeft += 1; // Scroll to the right
-          }
-        }
-      }, 10); // Tăng tốc độ cuộn (20ms thay vì 30ms)
-    };
+  const scrollLeft = () => {
+    scrollRef.current?.scrollBy({ left: -scrollByAmount, behavior: "smooth" });
+  };
 
-    const stopScrolling = () => {
-      clearInterval(scrollInterval);
-    };
-
-    if (scrollContainer) {
-      scrollContainer.addEventListener("mouseenter", stopScrolling);
-      scrollContainer.addEventListener("mouseleave", startScrolling);
-      startScrolling();
-    }
-
-    return () => {
-      if (scrollContainer) {
-        scrollContainer.removeEventListener("mouseenter", stopScrolling);
-        scrollContainer.removeEventListener("mouseleave", startScrolling);
-      }
-      clearInterval(scrollInterval);
-    };
-  }, [featuredBlogs]); // Keep the scrolling effect based on featured blogs state
+  const scrollRight = () => {
+    scrollRef.current?.scrollBy({ left: scrollByAmount, behavior: "smooth" });
+  };
 
   return (
-    <div className="container mx-auto w-full px-4 sm:w-[90%] md:w-[85%] lg:w-[80%] py-4 sm:py-6">
+    <div className="relative container mx-auto w-full px-4 sm:w-[90%] md:w-[85%] lg:w-[80%] py-4 sm:py-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 md:mb-12">
         <div className="mb-4 sm:mb-0">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">
@@ -89,27 +59,47 @@ export default function BlogListing() {
           </Button>
         </Link>
       </div>
+      {/* Nút trái */}
+      <button
+        onClick={scrollLeft}
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 shadow p-2 rounded-full hover:bg-gray-100">
+        <ChevronLeft className="w-5 h-5" />
+      </button>
 
-      <div
-        ref={scrollRef}
-        className="flex overflow-x-auto space-x-3 pb-8 scrollbar-hide"
-        style={{ scrollBehavior: "smooth" }}>
-        {featuredBlogs.map((blog, index) => (
-          <Link
-            key={index}
-            href={`/blogs/${blog.article_slug}/${encodeURIComponent(blog.article_id_hashed)}`}
-            className="flex-shrink-0">
-            <BlogCardShort
-              className="w-[223px] sm:w-[250px] md:w-[275px] lg:w-[300px] h-[340px] overflow-hidden p-3"
-              image={blog.article_avt}
-              date={`${blog.article_author_name} - ${new Date(blog.article_published_date).toLocaleDateString()}`}
-              title={blog.article_name}
-              hashtags={blog.article_tags || []}
-              isOdd={index % 2 !== 0}
-            />
-          </Link>
-        ))}
+      {/* Slider Controls */}
+      <div className="relative">
+        {/* Danh sách bài viết */}
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto space-x-3 scrollbar-hide scroll-smooth px-3"
+          style={{ scrollSnapType: "x mandatory" }}>
+          {featuredBlogs.map((blog, index) => (
+            <Link
+              key={index}
+              href={`/blogs/${blog.article_slug}/${encodeURIComponent(
+                blog.article_id_hashed
+              )}`}
+              className="flex-shrink-0 scroll-snap-align-start">
+              <BlogCardShort
+                className="w-[223px] sm:w-[250px] md:w-[275px] lg:w-[224px] h-[280px] overflow-hidden p-3"
+                image={blog.article_avt}
+                date={`${blog.article_author_name} - ${new Date(
+                  blog.article_published_date
+                ).toLocaleDateString()}`}
+                title={blog.article_name}
+                hashtags={blog.article_tags || []}
+                isOdd={index % 2 !== 0}
+              />
+            </Link>
+          ))}
+        </div>
       </div>
+      {/* Nút phải */}
+      <button
+        onClick={scrollRight}
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-800 shadow p-2 rounded-full hover:bg-gray-100">
+        <ChevronRight className="w-5 h-5" />
+      </button>
     </div>
   );
 }
