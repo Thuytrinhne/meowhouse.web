@@ -18,6 +18,8 @@ import { putData } from "@/utils/functions/client";
 import { PaginationWithLinks } from "@/components/ui/pagination-with-links";
 import { OrderProduct, Order } from "@/types/order";
 import { IPagination } from "@/types/interfaces";
+import { fetchWithAuth } from "@/utils/functions/server";
+import { ORDER_URL } from "@/utils/constants/urls";
 
 // Thêm hàm tính giá sau khi giảm giá
 const calculateDiscountedPrice = (price: number, discountPercent: number) => {
@@ -230,25 +232,17 @@ export default function HistoryOrder() {
   };
 
   const handleCancel = async (orderId: string) => {
-    if (!session?.user?.accessToken) return;
-
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/orders/cancel/${orderId}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${session.user.accessToken}`,
-          },
-        }
-      );
+      const response = await fetchWithAuth(`${ORDER_URL}/cancel/${orderId}`, {
+        method: "PUT",
+      });
 
-      if (!response.ok) {
+      if (!response.success) {
         throw new Error("Failed to cancel order");
       }
 
       toast.success("Hủy đơn hàng thành công");
-      fetchOrders(); // Refresh orders list
+      fetchOrders();
     } catch (error) {
       console.error("Error cancelling order:", error);
       toast.error("Không thể hủy đơn hàng");

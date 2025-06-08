@@ -20,6 +20,8 @@ export default function ProductDetailsPage() {
   const [activeTab, setActiveTab] = useState("info");
   const searchParams = useSearchParams();
   const pid = searchParams.get("pid");
+  // Giữ state currentIndex cho slider (ảnh đang hiển thị)
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     if (!pid) {
@@ -59,7 +61,12 @@ export default function ProductDetailsPage() {
 
   if (isLoading) return <p>Loading...</p>;
 
-  const handleVariantSelect = (index: number) => setSelectedVariantIndex(index);
+  const handleVariantSelect = (index: number) => {
+    setSelectedVariantIndex(index);
+
+    // Ví dụ mỗi variant có 1 ảnh riêng, lấy ảnh của variant đó trong product_imgs (giả sử trùng index)
+    setCurrentIndex(index);
+  };
   const handleQuantityChange = (newQuantity: number) =>
     setInputQuantity(newQuantity);
 
@@ -67,7 +74,15 @@ export default function ProductDetailsPage() {
     <div className="container mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg">
       <section className="flex flex-col laptop:flex-row gap-12">
         <div className="laptop:w-1/2">
-          <CustomerProductSlider SliderImgs={productData.product_imgs} />
+          <CustomerProductSlider
+            SliderImgs={productData.product_imgs}
+            showOutOfStockLabel={
+              productData.product_variants[selectedVariantIndex]
+                .variant_stock_quantity === 0
+            }
+            currentIndex={currentIndex}
+            onIndexChange={(index) => setCurrentIndex(index)}
+          />
         </div>
 
         <div className="laptop:w-2/3">
@@ -95,6 +110,10 @@ export default function ProductDetailsPage() {
             onVariantSelect={handleVariantSelect}
             onQuantityChange={handleQuantityChange}
             productSoldQuantity={productData.product_sold_quantity}
+            isOutOfStock={
+              productData.product_variants[selectedVariantIndex]
+                .variant_stock_quantity === 0
+            }
           />
         </div>
       </section>

@@ -138,6 +138,7 @@ interface IBuyFormProps {
   productSoldQuantity: number;
   onVariantSelect: (index: number) => void;
   onQuantityChange: (newQuantity: number) => void;
+  isOutOfStock?: boolean;
 }
 
 export interface IArticle {

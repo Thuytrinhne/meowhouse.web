@@ -5,10 +5,18 @@ import Image from "next/image";
 
 interface SliderImgProps {
   SliderImgs: string[];
+  showOutOfStockLabel?: boolean;
+  currentIndex: number;
+  onIndexChange?: (index: number) => void;
 }
 
-export default function CustomerProductSlider({ SliderImgs }: SliderImgProps) {
-  const [currentIndex, setCurrentIndex] = useState(0); // Cho slider chính
+export default function CustomerProductSlider({
+  SliderImgs,
+  showOutOfStockLabel,
+  currentIndex,
+  onIndexChange,
+}: SliderImgProps) {
+  console.log(SliderImgs);
   const [modalIndex, setModalIndex] = useState(0); // Cho modal
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,20 +33,20 @@ export default function CustomerProductSlider({ SliderImgs }: SliderImgProps) {
   };
 
   // Điều hướng cho slider chính
-  const handleThumbnailClick = (index: number) => {
-    setCurrentIndex(index);
-  };
-
   const handleScrollLeft = () => {
     const newIndex =
       currentIndex > 0 ? currentIndex - 1 : SliderImgs.length - 1;
-    setCurrentIndex(newIndex);
+    onIndexChange?.(newIndex);
   };
 
   const handleScrollRight = () => {
     const newIndex =
       currentIndex < SliderImgs.length - 1 ? currentIndex + 1 : 0;
-    setCurrentIndex(newIndex);
+    onIndexChange?.(newIndex);
+  };
+
+  const handleThumbnailClick = (index: number) => {
+    onIndexChange?.(index);
   };
 
   // Mở modal và đặt ảnh đầu tiên trong modal là ảnh đầu tiên của slider
@@ -75,6 +83,14 @@ export default function CustomerProductSlider({ SliderImgs }: SliderImgProps) {
             fill
             className="object-contain"
           />
+          {/* Nhãn Hết hàng */}
+          {showOutOfStockLabel && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="bg-gray-600 text-white text-sm font-bold px-10 py-10 rounded-full opacity-90">
+                Hết hàng
+              </div>
+            </div>
+          )}
         </div>
         {/* Nút điều hướng trái */}
         <button

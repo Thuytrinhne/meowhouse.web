@@ -22,6 +22,7 @@ export default function CustomerProductBuyForm({
   shortDescription,
   avgRating,
   productSoldQuantity,
+  isOutOfStock,
 }: IBuyFormProps) {
   const { data: session } = useSession(); // Lấy thông tin session
 
@@ -131,6 +132,7 @@ export default function CustomerProductBuyForm({
         product_avg_rating={avgRating.rating_point ?? 0}
         product_sold_quantity={productSoldQuantity ?? 0}
         product_rating_count={avgRating.rating_count ?? 0}
+        showRatingCount={true}
       />
 
       <div className="mb-4">
@@ -184,18 +186,38 @@ export default function CustomerProductBuyForm({
                 variants[selectedVariantIndex].variant_discount_percent / 100)
           )}
         </p>
+        <div className="text-sm text-gray-500 mt-2">
+          {variants[selectedVariantIndex].variant_stock_quantity <= 10 &&
+            variants[selectedVariantIndex].variant_stock_quantity > 0 && (
+              <span className="text-red-500 italic">
+                Chỉ còn {variants[selectedVariantIndex].variant_stock_quantity}{" "}
+                {""}
+                sản phẩm
+              </span>
+            )}
+        </div>
       </div>
 
       <div className="flex gap-4">
         <button
-          className="border border-pri-1 text-pri-1 dark:border-teal-500 dark:text-teal-500 w-48 py-3 rounded-lg hover:bg-teal-700 hover:text-white dark:hover:bg-teal-600"
+          className={`w-48 py-3 rounded-lg 
+          ${
+            isOutOfStock
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "border border-pri-1 text-pri-1 dark:border-teal-500 dark:text-teal-500 hover:bg-teal-700 hover:text-white dark:hover:bg-teal-600"
+          }`}
           onClick={handleAddToCart}
           data-cy="add-to-cart-button">
           Thêm vào giỏ hàng
         </button>
         <Link href="/order-information">
           <button
-            className="bg-pri-1 dark:bg-teal-500 text-white w-48 py-3 rounded-lg hover:bg-teal-700 dark:hover:bg-teal-600"
+            className={`w-48 py-3 rounded-lg 
+          ${
+              isOutOfStock
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-pri-1 dark:bg-teal-500 text-white hover:bg-teal-700 dark:hover:bg-teal-600"
+            }`}
             onClick={handleBuyNow} // Gọi hàm handleBuyNow khi bấm nút
             data-cy="buy-now-button">
             Mua ngay

@@ -4,12 +4,14 @@ interface CustomerStarRatingProps {
   product_avg_rating: number;
   product_sold_quantity: number;
   product_rating_count: number;
+  showRatingCount?: boolean;
 }
 
 export default function CustomerStarRating({
   product_avg_rating,
   product_sold_quantity,
   product_rating_count,
+  showRatingCount = false,
 }: CustomerStarRatingProps) {
   //  → Làm tròn xuống (vd: 4.3 → 4)
   let fullStars = Math.floor(product_avg_rating);
@@ -35,6 +37,11 @@ export default function CustomerStarRating({
     <div className="flex items-center mb-2 gap-1">
       {/* Bọc các sao trong div để hover hiện tooltip */}
       <div className="relative group flex items-center gap-1">
+        {showRatingCount && (
+          <h6 className="underline underline-offset-4 font-normal">
+            {product_avg_rating.toFixed(1)}
+          </h6>
+        )}
         {[...Array(fullStars)].map((_, i) => (
           <Star
             key={`full-${i}`}
@@ -55,7 +62,15 @@ export default function CustomerStarRating({
             className="text-gray-300 w-4 h-4 dark:text-gray-500"
           />
         ))}
-
+        {showRatingCount && (
+          <>
+            <span className="border-l h-7 border-gray-400 mx-2"></span>
+            <h6 className="underline underline-offset-4 font-normal">
+              {product_rating_count}
+            </h6>
+            <span className="text-gray-500"> Đánh giá</span>
+          </>
+        )}
         {/* Tooltip */}
         <div className="absolute bottom-full mb-1 left-0 opacity-0 group-hover:opacity-100 transition-opacity text-xs text-yellow-600 dark:text-gray-300 bg-white dark:bg-gray-800 px-2 py-1 rounded shadow z-10">
           {product_avg_rating.toFixed(1)} / 5 sao từ {product_rating_count} lượt
