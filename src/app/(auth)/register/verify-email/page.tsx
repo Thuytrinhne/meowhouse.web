@@ -32,6 +32,10 @@ function VerifyEmailContent() {
   if (isLoading) {
     return <div>Loading...</div>;
   }
+  const handleBackLogin = () => {
+    router.push("/login");
+  };
+
   return (
     <Card className="w-full max-w-[500px] pt-11 pb-11 px-4 shadow-lg hover:shadow-xl transition-shadow duration-300 mx-auto my-8 dark:bg-gray-800">
       <CardHeader className="text-center">
@@ -62,7 +66,8 @@ function VerifyEmailContent() {
         </Button>
         <Button
           className="mx-auto block text-[18px] w-auto px-6"
-          variant="custom_outlined">
+          variant="custom_outlined"
+          onClick={handleBackLogin}>
           Quay lại trang Đăng Nhập
         </Button>
       </CardFooter>

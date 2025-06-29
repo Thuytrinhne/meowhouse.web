@@ -8,6 +8,7 @@ import {
   Star,
   UserRoundPlus,
   TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import {
   Bar,
@@ -49,21 +50,8 @@ const revenueChartConfig = {
     color: "#2563eb",
   },
 } satisfies ChartConfig;
-
-const revenueData = [
-  { month: "Tháng 3", revenue: 1860000 },
-  { month: "Tháng 4", revenue: 3050000 },
-  { month: "Tháng 5", revenue: 2370000 },
-  { month: "Tháng 6", revenue: 730000 },
-  { month: "Tháng 7", revenue: 2090000 },
-  { month: "Tháng 8", revenue: 2140000 },
-  { month: "Tháng 9", revenue: 1860000 },
-  { month: "Tháng 10", revenue: 3050000 },
-  { month: "Tháng 11", revenue: 2370000 },
-  { month: "Tháng 12", revenue: 730000 },
-  { month: "Tháng 1", revenue: 2090000 },
-  { month: "Tháng 2", revenue: 825900 },
-];
+import { useEffect, useState } from "react";
+import { ADMIN_STATISTIC } from "@/utils/constants/urls";
 
 const orderChartConfig = {
   newOrders: {
@@ -80,19 +68,6 @@ const orderChartConfig = {
   },
 } satisfies ChartConfig;
 
-const orderData = [
-  { month: "Tháng 12", newOrders: 73, paidOrders: 60, canceledOrders: 13 },
-  { month: "Tháng 1", newOrders: 209, paidOrders: 200, canceledOrders: 9 },
-  { month: "Tháng 2", newOrders: 10, paidOrders: 7, canceledOrders: 3 },
-];
-
-const productByCategoryData = [
-  { category: "Vòng cổ, dây dắt", percent: 12, fill: "var(--color-category1)" },
-  { category: "Cỏ mèo", percent: 23, fill: "var(--color-category2)" },
-  { category: "Đồ chơi", percent: 45, fill: "var(--color-category3)" },
-  { category: "Quần áo", percent: 3, fill: "var(--color-category4)" },
-  { category: "Khác", percent: 2, fill: "var(--color-category5)" },
-];
 const productByCategoryChartConfig = {
   percent: {
     label: "Phần trăm",
@@ -119,14 +94,84 @@ const productByCategoryChartConfig = {
     color: "rgb(234 179 8)",
   },
 } satisfies ChartConfig;
-const summaryData = {
-  totalRevenue: 825900,
-  totalNewCustomers: 21,
-  totalNewOrders: 10,
-  totalNewRating: 9,
-};
 
 export default function AdminDashboard() {
+  const [summaryData, setSummaryData] = useState({
+    totalRevenue: 0,
+    totalRevenueToday: 0,
+    totalNewCustomers: 0,
+    totalNewOrders: 0,
+    totalNewRating: 0,
+    revenueGrowthRate: 0,
+  });
+  const [monthlyRevenue, setMonthlyRevenue] = useState([]);
+  const [quarterlyOrders, setQuarterlyOrders] = useState([]);
+  const [productByCategoryData, setProductByCategoryData] = useState([]);
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const res = await fetch(`${ADMIN_STATISTIC}/dashboard-summary`);
+        const json = await res.json();
+
+        if (res.ok && json?.data.summaryData) {
+          setSummaryData(json.data.summaryData);
+        } else {
+          console.error("Lỗi dữ liệu summary:", json.message);
+        }
+      } catch (err) {
+        console.error("Lỗi khi gọi API dashboard summary:", err);
+      }
+    };
+    const fetchMonthlyRevenue = async () => {
+      try {
+        const res = await fetch(`${ADMIN_STATISTIC}/revenue-monthly`);
+        const json = await res.json();
+
+        if (res.ok && json?.data?.revenueData) {
+          setMonthlyRevenue(json.data.revenueData);
+        } else {
+          console.error("Lỗi dữ liệu revenue monthly:", json.message);
+        }
+      } catch (err) {
+        console.error("Lỗi khi gọi API monthly revenue:", err);
+      }
+    };
+    const fetchQuarterlyOrderStats = async () => {
+      try {
+        const res = await fetch(`${ADMIN_STATISTIC}/quarterly-order-stats`);
+        const json = await res.json();
+
+        if (res.ok && json?.data) {
+          setQuarterlyOrders(json.data); // ← đúng key trả về
+        } else {
+          console.error("Lỗi dữ liệu quarterly order stats:", json.message);
+        }
+      } catch (err) {
+        console.error("Lỗi khi gọi API quarterly order stats:", err);
+      }
+    };
+    const fetchRevenueByCategory = async () => {
+      try {
+        const res = await fetch(`${ADMIN_STATISTIC}/revenue-by-category`);
+        const json = await res.json();
+
+        if (res.ok && json?.data) {
+          setProductByCategoryData(json.data);
+        } else {
+          console.error("Lỗi dữ liệu quarterly order stats:", json.message);
+        }
+      } catch (err) {
+        console.error("Lỗi khi gọi API quarterly order stats:", err);
+      }
+    };
+
+    fetchMonthlyRevenue();
+    fetchSummary();
+    fetchQuarterlyOrderStats();
+    fetchRevenueByCategory();
+  }, []);
+
   return (
     <main className="w-full py-2 flex flex-col items gap-4">
       <section className="flex flex-row justify-between">
@@ -149,7 +194,7 @@ export default function AdminDashboard() {
               {PAGE_DATA["dashboard-revenue"]}
             </h6>
             <p className="text-2xl font-bold">
-              {convertNumberToVND(summaryData.totalRevenue)}
+              {convertNumberToVND(summaryData.totalRevenueToday)}
             </p>
           </div>
         </div>
@@ -208,7 +253,7 @@ export default function AdminDashboard() {
           <ChartContainer
             config={revenueChartConfig}
             className="max-h-[400px] w-full">
-            <BarChart accessibilityLayer data={revenueData}>
+            <BarChart accessibilityLayer data={monthlyRevenue}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="month"
@@ -227,7 +272,9 @@ export default function AdminDashboard() {
                 fillOpacity={0.7}
                 radius={8}
                 strokeWidth={2}
-                activeIndex={11}
+                activeIndex={monthlyRevenue.findIndex((item) =>
+                  item.month.includes(`Tháng ${new Date().getMonth() + 1}`)
+                )}
                 activeBar={({ ...props }) => {
                   return (
                     <Rectangle
@@ -246,8 +293,19 @@ export default function AdminDashboard() {
         <CardFooter className="flex-col items-start gap-2 text-sm">
           <div className="flex gap-2 font-medium leading-none">
             {PAGE_DATA["dashboard-revenue-chart-footer"]}
-            <span className="text-red-500">-60.4%</span>{" "}
-            <TrendingUp className="h-4 w-4" />
+            <span
+              className={
+                summaryData.revenueGrowthRate >= 0
+                  ? "text-green-500"
+                  : "text-red-500"
+              }>
+              {summaryData.revenueGrowthRate}%
+            </span>{" "}
+            {summaryData.revenueGrowthRate >= 0 ? (
+              <TrendingUp className="h-4 w-4 text-green-500" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-red-500" />
+            )}{" "}
           </div>
         </CardFooter>
       </Card>
@@ -264,10 +322,10 @@ export default function AdminDashboard() {
             <ChartContainer
               config={orderChartConfig}
               className="max-h-[400px] w-full">
-              <BarChart accessibilityLayer data={orderData}>
+              <BarChart accessibilityLayer data={quarterlyOrders}>
                 <CartesianGrid vertical={false} />
                 <XAxis
-                  dataKey="month"
+                  dataKey="quarter"
                   tickLine={false}
                   tickMargin={10}
                   axisLine={false}

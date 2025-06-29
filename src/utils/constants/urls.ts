@@ -8,6 +8,7 @@ export const PRODUCT_URL = API_BASE_URL + "/guest/product";
 export const PRODUCT_LIST_URL = API_BASE_URL + "/guest/productList";
 export const LOCATION_URL = API_BASE_URL + "/locations";
 export const ADMIN_NOTIFICATIONS = API_BASE_URL + "/admin/notifications";
+export const ADMIN_STATISTIC = API_BASE_URL + "/admin/statistic";
 
 export const ADMIN_USERS_URL = `${process.env.BACKEND_URL}/admin/users`;
 export const PUBLIC_ADMIN_USERS_URL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/users`;

@@ -28,6 +28,7 @@ import { Pagination } from "@/components/(admin)/orders/pagination";
 import { DateRangePicker } from "@/components/(admin)/orders/date-range-picker";
 import { fetchData } from "@/utils/functions/server";
 import { ADMIN_ORDER_URL } from "@/utils/constants/urls";
+import { ADMIN_STATISTIC } from "@/utils/constants/urls";
 
 export function Orders() {
   const [orders, setOrders] = useState([]);
@@ -38,6 +39,7 @@ export function Orders() {
   const [dateFilter, setDateFilter] = useState("all");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [summaryData, setSummaryData] = useState(null);
   const itemsPerPage = 7;
 
   useEffect(() => {
@@ -54,6 +56,22 @@ export function Orders() {
 
     fetchOrders();
   }, [currentPage]);
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const res = await fetch(`${ADMIN_STATISTIC}/order-summary`);
+        const json = await res.json();
+
+        if (res.ok && json?.data) {
+          setSummaryData(json.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch summary data", err);
+      }
+    };
+    fetchSummary();
+  }, []);
 
   // Reset date range when date filter changes
   const handleDateFilterChange = (value: string) => {
@@ -188,21 +206,27 @@ export function Orders() {
             </Button>
           </div>
         </div>
-        <p className="text-muted-foreground">
-          An overview of recent data of customers info, products details and
-          analysis.
-        </p>
+        {/* <p className="text-muted-foreground">
+          Tổng quan dữ liệu mới nhất về thông tin khách hàng, chi tiết sản phẩm
+          và các phân tích liên quan.
+        </p> */}
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg p-6 flex justify-between items-center shadow-sm">
           <div>
-            <p className="text-sm text-muted-foreground">Total New Orders</p>
-            <h2 className="text-3xl font-bold mt-1">594</h2>
+            <p className="text-sm text-muted-foreground">Tổng Đơn Hàng Mới</p>
+            <h2 className="text-3xl font-bold mt-1">
+              {summaryData?.totalNewOrders?.value?.toLocaleString() ?? "--"}
+            </h2>
             <span className="inline-flex items-center text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded mt-1">
-              <ArrowUp className="h-3 w-3 mr-1" />
-              +54%
+              {summaryData?.totalNewOrders?.percent >= 0 ? (
+                <ArrowUp className="h-3 w-3 mr-1" />
+              ) : (
+                <ArrowDown className="h-3 w-3 mr-1" />
+              )}
+              {summaryData?.totalNewOrders?.percent}%
             </span>
           </div>
           <div className="bg-gray-100 p-3 rounded-lg">
@@ -213,7 +237,7 @@ export function Orders() {
         <div className="bg-white rounded-lg p-6 flex justify-between items-center shadow-sm">
           <div>
             <p className="text-sm text-muted-foreground">
-              Total Orders Pending
+              Tổng Đơn Hàng Đang Chờ Xử Lý
             </p>
             <h2 className="text-3xl font-bold mt-1">257,361</h2>
             <span className="inline-flex items-center text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded mt-1">
@@ -229,7 +253,7 @@ export function Orders() {
         <div className="bg-white rounded-lg p-6 flex justify-between items-center shadow-sm">
           <div>
             <p className="text-sm text-muted-foreground">
-              Total Products Sales
+              Tổng Số Sản Phẩm Đã Bán
             </p>
             <h2 className="text-3xl font-bold mt-1">8,594</h2>
             <span className="inline-flex items-center text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded mt-1">
@@ -245,7 +269,7 @@ export function Orders() {
         <div className="bg-white rounded-lg p-6 flex justify-between items-center shadow-sm">
           <div>
             <p className="text-sm text-muted-foreground">
-              Total Volume Of Products
+              Tổng Doanh Thu Từ Sản Phẩm:
             </p>
             <h2 className="text-3xl font-bold mt-1">257,361</h2>
             <span className="inline-flex items-center text-xs font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded mt-1">
@@ -257,7 +281,7 @@ export function Orders() {
             <Box className="h-6 w-6 text-gray-600" />
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Orders Table Section */}
       <div className="bg-white rounded-lg shadow-sm">
